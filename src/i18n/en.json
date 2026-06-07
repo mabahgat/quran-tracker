@@ -5,6 +5,7 @@
   "tabs": {
     "home": "Home",
     "plans": "Plans",
+    "log": "Log",
     "settings": "Settings"
   },
   "common": {
@@ -63,6 +64,7 @@
     "currentPosition": "Current position",
     "notStarted": "Not started yet",
     "nextUp": "Next to memorize",
+    "viewScheduleLink": "Schedule",
     "progress": "Progress",
     "versesOf": "{{done}} / {{total}} verses",
     "projectionHeading": "Projection",
@@ -105,6 +107,7 @@
     "editName": "Edit name",
     "makeDefault": "Set as default",
     "viewSchedule": "View full schedule",
+    "viewLog": "View plan log",
     "cadenceHeading": "Cadence",
     "cadenceNote": "Changing the cadence keeps the verses you've already memorized and recalculates your target date and projection.",
     "cadenceChanged": "Cadence changed to {{template}}"
@@ -140,5 +143,22 @@
     "aboutHeading": "About",
     "aboutBody": "Track the cadence of your Quran memorization and see when you will finish at your current pace.",
     "dataNote": "Your data is stored locally on this device."
+  },
+  "log": {
+    "title": "Activity log",
+    "planTitle": "Plan log",
+    "empty": "No activity yet. Create a plan and start logging your daily progress to build your history here.",
+    "emptyPlan": "No activity for this plan yet. Log your daily progress to start tracking it here.",
+    "deletedPlan": "{{name}} (deleted)",
+    "event": {
+      "plan_created": "Created plan",
+      "plan_renamed": "Renamed from “{{from}}” to “{{to}}”",
+      "plan_template_changed": "Changed cadence to {{template}}",
+      "plan_set_default": "Set as default plan",
+      "plan_deleted": "Deleted plan",
+      "logged_full": "Achieved the goal — {{verses}} verses",
+      "logged_partial": "Partial — {{verses}} verses",
+      "logged_missed": "Missed the day"
+    }
   }
 }

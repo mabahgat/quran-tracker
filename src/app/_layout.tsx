@@ -27,6 +27,7 @@ function RootNavigator() {
       <Stack.Screen name="plans/new" options={{ title: t('newPlan.title'), presentation: 'modal' }} />
       <Stack.Screen name="plans/[id]" options={{ title: t('detail.title') }} />
       <Stack.Screen name="templates/[id]" options={{ title: t('schedule.title') }} />
+      <Stack.Screen name="plan-log/[id]" options={{ title: t('log.planTitle') }} />
     </Stack>
   );
 }

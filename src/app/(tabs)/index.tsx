@@ -18,6 +18,7 @@ import {
   isValidPosition,
   lastMemorizedPosition,
   nextPosition,
+  positionAtIndex,
   TOTAL_AYAH,
 } from '@/domain/quran';
 import { QuranPosition } from '@/domain/types';
@@ -69,7 +70,28 @@ export default function HomeScreen() {
     log('missed');
   };
 
+  const goToSchedule = () =>
+    router.push({
+      pathname: '/templates/[id]',
+      params: {
+        id: plan.templateId,
+        start: plan.startDate,
+        target: String(plan.templateSnapshot.dailyTarget),
+        duration: String(plan.templateSnapshot.durationDays),
+      },
+    });
+
   const memorizedBeforeToday = projection.totalMemorized - (todayEntry?.verses ?? 0);
+
+  // Start and end of the next portion to memorize: from the next ayah up to the
+  // position reached by completing today's goal (the schedule chunk, or the flat
+  // daily target).
+  const nextStart = projection.nextPosition;
+  const nextEnd =
+    nextStart && dailyGoal > 0
+      ? positionAtIndex(Math.min(projection.totalMemorized + dailyGoal, TOTAL_AYAH))
+      : null;
+  const rangeArrow = isRTL ? '←' : '→';
 
   const openPartial = () => {
     setPartialValue(todayEntry?.status === 'partial' ? String(todayEntry.verses) : '');
@@ -119,8 +141,12 @@ export default function HomeScreen() {
     setPartialMode(false);
   };
 
-  const variantFor = (status: string) =>
-    todayEntry?.status === status ? ('primary' as const) : ('secondary' as const);
+  // While entering a partial value, highlight Partial (even before saving);
+  // otherwise reflect what was actually logged today.
+  const variantFor = (status: string) => {
+    const active = partialMode ? status === 'partial' : todayEntry?.status === status;
+    return active ? ('primary' as const) : ('secondary' as const);
+  };
 
   const renderStatusLine = () => {
     if (!projection.isComplete && projection.daysAheadOfTarget !== null) {
@@ -146,14 +172,23 @@ export default function HomeScreen() {
             {isRTL ? '‹' : '›'}
           </ThemedText>
         </Pressable>
-        <View style={[styles.headerMeta, { flexDirection: flexRow }]}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={goToSchedule}
+          style={({ pressed }) => [
+            styles.headerMeta,
+            { flexDirection: flexRow, opacity: pressed ? 0.6 : 1 },
+          ]}>
           <Badge tone="primary" label={t(`templates.${plan.templateId}`)} />
           <ThemedText type="small" style={{ color: theme.textSecondary }}>
             {isScheduled
               ? t('home.todayGoalShort', { n: dailyGoal })
               : t('templates.perDay', { n: plan.dailyTarget })}
           </ThemedText>
-        </View>
+          <ThemedText type="small" style={{ color: theme.primary }}>
+            {t('home.viewScheduleLink')} {isRTL ? '‹' : '›'}
+          </ThemedText>
+        </Pressable>
       </View>
 
       <Card>
@@ -306,8 +341,15 @@ export default function HomeScreen() {
         <ThemedText type="subtitle" style={[styles.position, { textAlign, color: theme.primary }]}>
           {projection.position ? formatPosition(projection.position, language) : t('home.notStarted')}
         </ThemedText>
-        {projection.nextPosition ? (
-          <InfoRow label={t('home.nextUp')} value={formatPosition(projection.nextPosition, language)} />
+        {nextStart ? (
+          <InfoRow
+            label={t('home.nextUp')}
+            value={
+              nextEnd
+                ? `${formatPosition(nextStart, language)} ${rangeArrow} ${formatPosition(nextEnd, language)}`
+                : formatPosition(nextStart, language)
+            }
+          />
         ) : null}
       </Card>
 

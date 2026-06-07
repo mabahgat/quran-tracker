@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useRepositories } from '@/data/RepositoryProvider';
+import { progressLoggedEvent } from '@/domain/events';
 import { getExplicitSchedule, nextScheduledChunk } from '@/domain/explicitSchedule';
 import { computeProjection, ProjectionResult } from '@/domain/projection';
 import { totalMemorized, versesForStatus } from '@/domain/progress';
@@ -84,6 +85,7 @@ export function usePlan(planId: string | null | undefined): UsePlanResult {
       if (!plan) return;
       const credited = versesForStatus(status, dailyGoal, verses);
       await repositories.progress.upsert({ planId: plan.id, date, status, verses: credited });
+      await repositories.events.add(progressLoggedEvent(plan, status, credited, date));
       await reload();
     },
     [repositories, plan, reload, dailyGoal],

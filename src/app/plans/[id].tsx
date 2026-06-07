@@ -246,6 +246,12 @@ export default function PlanDetailScreen() {
         }
       />
 
+      <Button
+        variant="secondary"
+        title={t('detail.viewLog')}
+        onPress={() => router.push({ pathname: '/plan-log/[id]', params: { id: plan.id } })}
+      />
+
       {!plan.isDefault ? (
         <Button variant="secondary" title={t('detail.makeDefault')} onPress={makeDefault} />
       ) : null}

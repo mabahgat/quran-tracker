@@ -1,5 +1,8 @@
-import { Plan, ProgressEntry } from '../../domain/types';
+import { AppEvent, Plan, ProgressEntry } from '../../domain/types';
+import { sortEventsDesc } from '../../domain/events';
 import {
+  EventRepository,
+  NewAppEvent,
   NewPlan,
   NewProgressEntry,
   PlanChanges,
@@ -25,6 +28,7 @@ export function createMemoryRepositories(idGen: () => string = fallbackId): Repo
   const plans = new Map<string, Plan>();
   const progress = new Map<string, ProgressEntry>();
   const settings = new Map<string, string>();
+  const events = new Map<string, AppEvent>();
 
   const now = () => new Date().toISOString();
 
@@ -133,5 +137,30 @@ export function createMemoryRepositories(idGen: () => string = fallbackId): Repo
     },
   };
 
-  return { plans: planRepo, progress: progressRepo, settings: settingsRepo };
+  const eventsRepo: EventRepository = {
+    async list(limit) {
+      const sorted = sortEventsDesc([...events.values()]);
+      return typeof limit === 'number' ? sorted.slice(0, limit) : sorted;
+    },
+    async listByPlan(planId, limit) {
+      const sorted = sortEventsDesc(
+        [...events.values()].filter((event) => event.planId === planId),
+      );
+      return typeof limit === 'number' ? sorted.slice(0, limit) : sorted;
+    },
+    async add(input: NewAppEvent) {
+      const event: AppEvent = {
+        id: idGen(),
+        type: input.type,
+        planId: input.planId,
+        planName: input.planName,
+        details: input.details,
+        createdAt: now(),
+      };
+      events.set(event.id, event);
+      return event;
+    },
+  };
+
+  return { plans: planRepo, progress: progressRepo, settings: settingsRepo, events: eventsRepo };
 }

@@ -18,6 +18,10 @@ abstraction that is ready for a **remote backend** in the future.
 - **Live projection**: your current pace → projected finish date, compared against the plan's target,
   showing whether you are **ahead** or **behind**.
 - **Position tracking** by Surah name/number and verse number (e.g. `Al-Baqarah (2) : 56`).
+- **Activity log**: a chronological feed of everything you do — each day logged (Full/Partial/Missed),
+  plus plan created, renamed, cadence changed, set-as-default, and deleted. Available globally (Log
+  tab) and **per plan** (from a plan's detail screen). Events are kept even after a plan is deleted
+  (the plan name is snapshotted), so the log is a complete audit trail.
 - **English + Arabic** with automatic device-language detection and instant in-app switching (RTL aware).
 
 ## Tech stack
@@ -69,15 +73,19 @@ src/
     (tabs)/                 bottom tabs
       index.tsx             Home dashboard (default plan, daily logging, projection)
       plans.tsx             Plans list (set default, delete)
+      log.tsx               Activity log (chronological feed of all events)
       settings.tsx          Language + default plan + about
     plans/
       new.tsx               Create a plan (name + cadence template)
       [id].tsx              Plan detail: stats, projection, history
+    plan-log/
+      [id].tsx              Per-plan activity log
   domain/                   pure, fully unit-tested business logic (no RN/Expo imports)
     quranData.ts            the 114 surahs (Arabic + English names, verse counts)
     quran.ts                position math: verse count <-> (surah, ayah)
     templates.ts            loads + validates the cadence templates from JSON resources
     schedule.ts             full day-by-day schedule generation
+    events.ts               activity-log event types + factory helpers
     progress.ts             status -> verses, aggregation helpers
     projection.ts           pace, projected finish date, ahead/behind target
   resources/
@@ -85,10 +93,10 @@ src/
     schedules/*.json         explicit expert timetables (e.g. incremental-100-days, from the Excel)
   data/                     storage layer (local now, remote-ready)
     db.ts / db.web.ts       SQLite (native) / in-memory (web) initialization
-    repositories/           Plan/Progress/Settings interfaces + sqlite & memory impls
+    repositories/           Plan/Progress/Settings/Event interfaces + sqlite & memory impls
     RepositoryProvider.tsx  injects the active storage implementation
   i18n/                     i18next config + en.json / ar.json
-  state/                    AppProvider (language, plans, default plan) + usePlan hook
+  state/                    AppProvider (language, plans, default plan) + usePlan/useEvents hooks
   components/               Screen, Card, Button, ProgressBar, Badge, InfoRow, Toast, ...
   hooks/, utils/            theme, direction (RTL), date math, formatting, ids
 ```

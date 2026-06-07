@@ -1,4 +1,5 @@
-import { CadenceTemplate, Plan, ProgressEntry, ProgressStatus, TemplateId } from '../../domain/types';
+import { AppEvent, CadenceTemplate, Plan, ProgressEntry, ProgressStatus, TemplateId } from '../../domain/types';
+import { EventDraft } from '../../domain/events';
 
 export interface NewPlan {
   name: string;
@@ -18,6 +19,8 @@ export interface NewProgressEntry {
   status: ProgressStatus;
   verses: number;
 }
+
+export type NewAppEvent = EventDraft;
 
 export interface PlanRepository {
   list(): Promise<Plan[]>;
@@ -44,8 +47,17 @@ export interface SettingsRepository {
   all(): Promise<Record<string, string>>;
 }
 
+export interface EventRepository {
+  /** Activity log, most recent first. Optionally capped to `limit` rows. */
+  list(limit?: number): Promise<AppEvent[]>;
+  /** Events for a single plan, most recent first. Optionally capped to `limit`. */
+  listByPlan(planId: string, limit?: number): Promise<AppEvent[]>;
+  add(input: NewAppEvent): Promise<AppEvent>;
+}
+
 export interface Repositories {
   plans: PlanRepository;
   progress: ProgressRepository;
   settings: SettingsRepository;
+  events: EventRepository;
 }

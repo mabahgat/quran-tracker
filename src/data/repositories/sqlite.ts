@@ -1,9 +1,11 @@
 import type * as SQLite from 'expo-sqlite';
 
 import { getTemplate } from '../../domain/templates';
-import { CadenceTemplate, Plan, ProgressEntry } from '../../domain/types';
+import { AppEvent, CadenceTemplate, EventDetails, EventType, Plan, ProgressEntry } from '../../domain/types';
 import { newId } from '../../utils/id';
 import {
+  EventRepository,
+  NewAppEvent,
   NewPlan,
   NewProgressEntry,
   PlanChanges,
@@ -33,6 +35,34 @@ interface ProgressRow {
   verses: number;
   created_at: string;
   updated_at: string;
+}
+
+interface EventRow {
+  id: string;
+  type: EventType;
+  plan_id: string | null;
+  plan_name: string;
+  details: string | null;
+  created_at: string;
+}
+
+function toEvent(row: EventRow): AppEvent {
+  let details: EventDetails = {};
+  if (row.details) {
+    try {
+      details = JSON.parse(row.details) as EventDetails;
+    } catch {
+      details = {};
+    }
+  }
+  return {
+    id: row.id,
+    type: row.type,
+    planId: row.plan_id,
+    planName: row.plan_name,
+    details,
+    createdAt: row.created_at,
+  };
 }
 
 function parseSnapshot(raw: string | null, templateId: Plan['templateId']): CadenceTemplate {
@@ -227,5 +257,49 @@ export function createSqliteRepositories(db: SQLite.SQLiteDatabase): Repositorie
     },
   };
 
-  return { plans, progress, settings };
+  const events: EventRepository = {
+    async list(limit) {
+      const sql =
+        'SELECT * FROM events ORDER BY created_at DESC, id DESC' +
+        (typeof limit === 'number' ? ' LIMIT ?' : '');
+      const rows =
+        typeof limit === 'number'
+          ? await db.getAllAsync<EventRow>(sql, limit)
+          : await db.getAllAsync<EventRow>(sql);
+      return rows.map(toEvent);
+    },
+    async listByPlan(planId, limit) {
+      const sql =
+        'SELECT * FROM events WHERE plan_id = ? ORDER BY created_at DESC, id DESC' +
+        (typeof limit === 'number' ? ' LIMIT ?' : '');
+      const rows =
+        typeof limit === 'number'
+          ? await db.getAllAsync<EventRow>(sql, planId, limit)
+          : await db.getAllAsync<EventRow>(sql, planId);
+      return rows.map(toEvent);
+    },
+    async add(input: NewAppEvent) {
+      const event: AppEvent = {
+        id: newId(),
+        type: input.type,
+        planId: input.planId,
+        planName: input.planName,
+        details: input.details,
+        createdAt: now(),
+      };
+      await db.runAsync(
+        `INSERT INTO events (id, type, plan_id, plan_name, details, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        event.id,
+        event.type,
+        event.planId,
+        event.planName,
+        JSON.stringify(event.details),
+        event.createdAt,
+      );
+      return event;
+    },
+  };
+
+  return { plans, progress, settings, events };
 }

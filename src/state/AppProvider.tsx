@@ -2,6 +2,13 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { I18nManager } from 'react-native';
 
 import { useRepositories } from '@/data/RepositoryProvider';
+import {
+  planCreatedEvent,
+  planDeletedEvent,
+  planRenamedEvent,
+  planSetDefaultEvent,
+  planTemplateChangedEvent,
+} from '@/domain/events';
 import { getTemplate } from '@/domain/templates';
 import { Plan, TemplateId } from '@/domain/types';
 import { detectDeviceLanguage, initI18n, isRTL, Language } from '@/i18n';
@@ -96,6 +103,7 @@ export function AppProvider({
         dailyTarget: snapshot.dailyTarget,
         templateSnapshot: snapshot,
       });
+      await repositories.events.add(planCreatedEvent(plan));
       const existingDefault = await repositories.plans.getDefault();
       if (!existingDefault) {
         await repositories.plans.setDefault(plan.id);
@@ -108,7 +116,11 @@ export function AppProvider({
 
   const renamePlan = useCallback(
     async (id: string, name: string) => {
-      await repositories.plans.update(id, { name: name.trim() });
+      const existing = await repositories.plans.get(id);
+      const updated = await repositories.plans.update(id, { name: name.trim() });
+      if (existing && existing.name !== updated.name) {
+        await repositories.events.add(planRenamedEvent(updated, existing.name, updated.name));
+      }
       await refreshPlans();
     },
     [repositories, refreshPlans],
@@ -116,12 +128,18 @@ export function AppProvider({
 
   const changePlanTemplate = useCallback(
     async (id: string, templateId: TemplateId) => {
+      const existing = await repositories.plans.get(id);
       const snapshot = getTemplate(templateId);
-      await repositories.plans.update(id, {
+      const updated = await repositories.plans.update(id, {
         templateId,
         dailyTarget: snapshot.dailyTarget,
         templateSnapshot: snapshot,
       });
+      if (existing && existing.templateId !== templateId) {
+        await repositories.events.add(
+          planTemplateChangedEvent(updated, existing.templateId, templateId),
+        );
+      }
       await refreshPlans();
     },
     [repositories, refreshPlans],
@@ -129,9 +147,13 @@ export function AppProvider({
 
   const deletePlan = useCallback(
     async (id: string) => {
-      const wasDefault = (await repositories.plans.get(id))?.isDefault ?? false;
+      const target = await repositories.plans.get(id);
+      const wasDefault = target?.isDefault ?? false;
       await repositories.progress.removeByPlan(id);
       await repositories.plans.remove(id);
+      if (target) {
+        await repositories.events.add(planDeletedEvent(target));
+      }
       if (wasDefault) {
         const remaining = await repositories.plans.list();
         if (remaining.length > 0) {
@@ -146,6 +168,10 @@ export function AppProvider({
   const setDefaultPlan = useCallback(
     async (id: string) => {
       await repositories.plans.setDefault(id);
+      const plan = await repositories.plans.get(id);
+      if (plan) {
+        await repositories.events.add(planSetDefaultEvent(plan));
+      }
       await refreshPlans();
     },
     [repositories, refreshPlans],

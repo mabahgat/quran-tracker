@@ -36,6 +36,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="log"
+        options={{
+          title: t('tabs.log'),
+          tabBarIcon: ({ focused }) => <TabIcon glyph="🕔" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: t('tabs.settings'),

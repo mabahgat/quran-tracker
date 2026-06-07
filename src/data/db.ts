@@ -51,6 +51,21 @@ const MIGRATIONS: Migration[] = [
       );
     }
   },
+  // Activity log. Intentionally has no foreign key to plans: events are an audit
+  // trail and must survive plan deletion (plan_id may dangle, plan_name is kept).
+  async (db) => {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS events (
+        id TEXT PRIMARY KEY NOT NULL,
+        type TEXT NOT NULL,
+        plan_id TEXT,
+        plan_name TEXT NOT NULL,
+        details TEXT,
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at DESC);
+    `);
+  },
 ];
 
 export async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {

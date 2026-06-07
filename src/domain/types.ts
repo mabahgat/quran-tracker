@@ -75,3 +75,29 @@ export interface ProgressEntry {
   createdAt: string;
   updatedAt: string;
 }
+
+export type EventType =
+  | 'plan_created'
+  | 'plan_renamed'
+  | 'plan_template_changed'
+  | 'plan_set_default'
+  | 'plan_deleted'
+  | 'progress_logged';
+
+/** Type-specific payload for an event, stored as JSON. Values are kept primitive
+ *  so the log stays portable and human-readable. */
+export type EventDetails = Record<string, string | number>;
+
+/**
+ * A single entry in the user's activity log. `planName` is snapshotted so the log
+ * stays readable even after a plan is deleted (events are never cascade-removed).
+ */
+export interface AppEvent {
+  id: string;
+  type: EventType;
+  planId: string | null;
+  planName: string;
+  details: EventDetails;
+  createdAt: string;
+}
+

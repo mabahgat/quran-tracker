@@ -28,3 +28,16 @@ export function diffDays(fromIso: string, toIso: string): number {
 export function daysInclusive(fromIso: string, toIso: string): number {
   return diffDays(fromIso, toIso) + 1;
 }
+
+/** Local-time parts of an ISO timestamp, for displaying the activity log. */
+export function localDateTimeParts(iso: string): { date: string; time: string } {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) {
+    return { date: iso, time: '' };
+  }
+  return {
+    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
+}
+

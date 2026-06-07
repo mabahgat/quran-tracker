@@ -5,6 +5,7 @@
   "tabs": {
     "home": "الرئيسية",
     "plans": "الخطط",
+    "log": "السجل",
     "settings": "الإعدادات"
   },
   "common": {
@@ -63,6 +64,7 @@
     "currentPosition": "الموضع الحالي",
     "notStarted": "لم يبدأ بعد",
     "nextUp": "التالي للحفظ",
+    "viewScheduleLink": "الجدول",
     "progress": "التقدم",
     "versesOf": "{{done}} / {{total}} آية",
     "projectionHeading": "التوقع",
@@ -105,6 +107,7 @@
     "editName": "تعديل الاسم",
     "makeDefault": "تعيين كافتراضية",
     "viewSchedule": "عرض الجدول الكامل",
+    "viewLog": "عرض سجل الخطة",
     "cadenceHeading": "الوتيرة",
     "cadenceNote": "تغيير الوتيرة يحافظ على الآيات التي حفظتها بالفعل ويعيد حساب التاريخ المستهدف والتوقع.",
     "cadenceChanged": "تم تغيير الوتيرة إلى {{template}}"
@@ -140,5 +143,22 @@
     "aboutHeading": "حول التطبيق",
     "aboutBody": "تابع وتيرة حفظك للقرآن الكريم واعرف موعد انتهائك حسب وتيرتك الحالية.",
     "dataNote": "بياناتك مخزّنة محلياً على هذا الجهاز."
+  },
+  "log": {
+    "title": "سجل النشاط",
+    "planTitle": "سجل الخطة",
+    "empty": "لا يوجد نشاط بعد. أنشئ خطة وابدأ بتسجيل تقدمك اليومي لبناء سجلك هنا.",
+    "emptyPlan": "لا يوجد نشاط لهذه الخطة بعد. سجّل تقدمك اليومي لتتبعه هنا.",
+    "deletedPlan": "{{name}} (محذوفة)",
+    "event": {
+      "plan_created": "إنشاء خطة",
+      "plan_renamed": "إعادة التسمية من ”{{from}}“ إلى ”{{to}}“",
+      "plan_template_changed": "تغيير الوتيرة إلى {{template}}",
+      "plan_set_default": "تعيين كخطة افتراضية",
+      "plan_deleted": "حذف الخطة",
+      "logged_full": "تحقق الهدف — {{verses}} آية",
+      "logged_partial": "جزئي — {{verses}} آية",
+      "logged_missed": "فات اليوم"
+    }
   }
 }
