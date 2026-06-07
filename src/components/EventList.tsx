@@ -147,15 +147,15 @@ export function EventList({ events, showPlanName = true, onDelete, ListHeaderCom
           </Pressable>
         );
 
-        // The user swipes the row to the right to reveal a delete action on the
-        // leading edge (mirrored for RTL).
+        // Swipe to delete: left in LTR, right in RTL (the trailing edge in both),
+        // matching the plans list.
         return (
           <Swipeable
             friction={2}
             overshootLeft={false}
             overshootRight={false}
-            renderLeftActions={isRTL ? undefined : deleteAction}
-            renderRightActions={isRTL ? deleteAction : undefined}>
+            renderLeftActions={isRTL ? deleteAction : undefined}
+            renderRightActions={isRTL ? undefined : deleteAction}>
             {row}
           </Swipeable>
         );
