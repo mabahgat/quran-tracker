@@ -1,0 +1,11 @@
+{
+  "id": "1-month",
+  "kind": "computed",
+  "names": {
+    "en": "1 month (1 Juz/day)",
+    "ar": "شهر (جزء/يوم)"
+  },
+  "durationDays": 30,
+  "dailyTarget": 208,
+  "totalVerses": 6236
+}

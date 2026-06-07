@@ -14,13 +14,14 @@ import { TemplateId } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
+import { templateName } from '@/utils/format';
 import { todayISO } from '@/utils/date';
 
 export default function NewPlanScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const theme = useTheme();
-  const { textAlign, flexRow } = useDirection();
+  const { textAlign, flexRow, language } = useDirection();
   const { createPlan } = useApp();
 
   const [name, setName] = useState('');
@@ -73,7 +74,7 @@ export default function NewPlanScreen() {
                 <View style={[styles.templateRow, { flexDirection: flexRow }]}>
                   <View style={styles.flexShrink}>
                     <ThemedText style={[styles.templateName, { textAlign }]}>
-                      {t(`templates.${template.id}`)}
+                      {templateName(template.id, language)}
                     </ThemedText>
                     <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
                       {t('templates.perDay', { n: dailyTargetFor(template.id) })}

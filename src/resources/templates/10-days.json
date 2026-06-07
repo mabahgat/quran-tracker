@@ -1,0 +1,11 @@
+{
+  "id": "10-days",
+  "kind": "computed",
+  "names": {
+    "en": "10 days (3 Juz/day)",
+    "ar": "10 أيام (3 أجزاء/يوم)"
+  },
+  "durationDays": 10,
+  "dailyTarget": 624,
+  "totalVerses": 6236
+}

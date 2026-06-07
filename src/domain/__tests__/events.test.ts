@@ -4,6 +4,7 @@ import {
   planRenamedEvent,
   planSetDefaultEvent,
   planTemplateChangedEvent,
+  progressDeletedEvent,
   progressLoggedEvent,
   sortEventsDesc,
 } from '../events';
@@ -58,6 +59,13 @@ describe('event factories', () => {
     const event = progressLoggedEvent(plan, 'partial', 20, '2025-01-02');
     expect(event.type).toBe('progress_logged');
     expect(event.details).toEqual({ status: 'partial', verses: 20, date: '2025-01-02' });
+  });
+
+  it('builds a progress_deleted event carrying the date', () => {
+    const event = progressDeletedEvent(plan, '2025-01-02');
+    expect(event.type).toBe('progress_deleted');
+    expect(event.planId).toBe('plan-1');
+    expect(event.details).toEqual({ date: '2025-01-02' });
   });
 });
 

@@ -71,6 +71,15 @@ export function progressLoggedEvent(
   };
 }
 
+export function progressDeletedEvent(plan: Plan, date: string): EventDraft {
+  return {
+    type: 'progress_deleted',
+    planId: plan.id,
+    planName: plan.name,
+    details: { date },
+  };
+}
+
 /** Most recent first; ties broken by id so ordering is stable in tests. */
 export function sortEventsDesc(events: readonly AppEvent[]): AppEvent[] {
   return [...events].sort((a, b) => {

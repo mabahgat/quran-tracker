@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingScreen, MessageScreen } from '@/components/LoadingScreen';
@@ -36,19 +37,21 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <RepositoryProvider
-          fallback={<LoadingScreen />}
-          errorFallback={(error) => <MessageScreen tone="danger" message={error.message} />}>
-          <AppProvider fallback={<LoadingScreen />}>
-            <ToastProvider>
-              <RootNavigator />
-              <StatusBar style="auto" />
-            </ToastProvider>
-          </AppProvider>
-        </RepositoryProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <RepositoryProvider
+            fallback={<LoadingScreen />}
+            errorFallback={(error) => <MessageScreen tone="danger" message={error.message} />}>
+            <AppProvider fallback={<LoadingScreen />}>
+              <ToastProvider>
+                <RootNavigator />
+                <StatusBar style="auto" />
+              </ToastProvider>
+            </AppProvider>
+          </RepositoryProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

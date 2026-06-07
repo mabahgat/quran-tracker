@@ -1,0 +1,11 @@
+{
+  "id": "2-months",
+  "kind": "computed",
+  "names": {
+    "en": "2 months (½ Juz/day)",
+    "ar": "شهران (نصف جزء/يوم)"
+  },
+  "durationDays": 60,
+  "dailyTarget": 104,
+  "totalVerses": 6236
+}

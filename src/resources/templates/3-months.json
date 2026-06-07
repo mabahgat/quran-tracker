@@ -1,0 +1,11 @@
+{
+  "id": "3-months",
+  "kind": "computed",
+  "names": {
+    "en": "3 months",
+    "ar": "3 أشهر"
+  },
+  "durationDays": 90,
+  "dailyTarget": 70,
+  "totalVerses": 6236
+}

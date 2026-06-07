@@ -1,3 +1,7 @@
+import template10Days from '../resources/templates/10-days.json';
+import template1Month from '../resources/templates/1-month.json';
+import template2Months from '../resources/templates/2-months.json';
+import template3Months from '../resources/templates/3-months.json';
 import template100Days from '../resources/templates/100-days.json';
 import templateIncremental100Days from '../resources/templates/incremental-100-days.json';
 import template6Months from '../resources/templates/6-months.json';
@@ -9,6 +13,10 @@ import { TOTAL_AYAH } from './quran';
 import { CadenceTemplate, TemplateId, TemplateKind } from './types';
 
 const TEMPLATE_IDS: readonly TemplateId[] = [
+  '10-days',
+  '1-month',
+  '2-months',
+  '3-months',
   '100-days',
   'incremental-100-days',
   '6-months',
@@ -19,6 +27,10 @@ const TEMPLATE_IDS: readonly TemplateId[] = [
 ];
 
 const RAW_TEMPLATES = [
+  template10Days,
+  template1Month,
+  template2Months,
+  template3Months,
   template100Days,
   templateIncremental100Days,
   template6Months,
@@ -74,15 +86,27 @@ function parseTemplate(raw: unknown): CadenceTemplate {
   };
 }
 
+/**
+ * Loads, validates and orders every template resource. The list is derived
+ * entirely from the JSON files (sorted by duration, with the computed variant
+ * before the scheduled one when they share a duration) so edits to the resources
+ * — including names — are reflected in the app on the next startup.
+ */
 function loadTemplates(): CadenceTemplate[] {
   const parsed = RAW_TEMPLATES.map(parseTemplate);
-  return TEMPLATE_IDS.map((id) => {
-    const match = parsed.find((template) => template.id === id);
-    if (!match) {
-      throw new Error(`Missing template resource for: ${id}`);
+  const seen = new Set<string>();
+  for (const template of parsed) {
+    if (seen.has(template.id)) {
+      throw new Error(`Duplicate template resource id: ${template.id}`);
     }
-    return match;
-  });
+    seen.add(template.id);
+  }
+  const kindRank = (kind: TemplateKind) => (kind === 'computed' ? 0 : 1);
+  return [...parsed].sort((a, b) =>
+    a.durationDays !== b.durationDays
+      ? a.durationDays - b.durationDays
+      : kindRank(a.kind) - kindRank(b.kind),
+  );
 }
 
 export const TEMPLATES: readonly CadenceTemplate[] = loadTemplates();

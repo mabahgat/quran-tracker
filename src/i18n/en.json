@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Quran Memorization"
+    "title": "Quran Tracker"
   },
   "tabs": {
     "home": "Home",
@@ -19,13 +19,6 @@
     "none": "None"
   },
   "templates": {
-    "100-days": "100 days",
-    "incremental-100-days": "Incremental 100 days",
-    "6-months": "6 months",
-    "incremental-6-months": "Incremental 6 months",
-    "1-year": "1 year",
-    "incremental-1-year": "Incremental 1 year",
-    "2-years": "2 years",
     "perDay": "{{n}} verses/day",
     "scheduledBadge": "Day-by-day plan"
   },
@@ -36,18 +29,18 @@
   },
   "home": {
     "noDefaultTitle": "No default plan yet",
-    "noDefaultBody": "Create a plan and mark it as default to track your daily memorization cadence here.",
+    "noDefaultBody": "Create a plan and mark it as default to track your daily Quran cadence here.",
     "createPlan": "Create a plan",
     "todayHeading": "Today",
-    "todayQuestion": "How did your memorization go today?",
+    "todayQuestion": "How did today go?",
     "todayGoalLabel": "Today's goal",
     "todayGoalShort": "Today: {{n}} verses",
-    "upToLabel": "Memorize up to",
+    "upToLabel": "Reach up to",
     "versesCount": "{{n}} verses",
     "logFull": "Full",
     "logPartial": "Partial",
     "logMissed": "Missed",
-    "partialPrompt": "How many verses did you memorize today?",
+    "partialPrompt": "How many verses did you complete today?",
     "partialByVerses": "By verses",
     "partialByPosition": "By position",
     "selectSurahTitle": "Select surah",
@@ -63,7 +56,7 @@
     "changeEntry": "Change",
     "currentPosition": "Current position",
     "notStarted": "Not started yet",
-    "nextUp": "Next to memorize",
+    "nextUp": "Next up",
     "viewScheduleLink": "Schedule",
     "progress": "Progress",
     "versesOf": "{{done}} / {{total}} verses",
@@ -75,7 +68,7 @@
     "behind": "{{n}} days behind target",
     "onTrack": "Right on target",
     "needProgress": "Log at least one day to see your projected finish date.",
-    "complete": "Memorization complete — ma sha Allah!"
+    "complete": "Completed — ma sha Allah!"
   },
   "plans": {
     "title": "Plans",
@@ -90,7 +83,7 @@
   "newPlan": {
     "title": "New plan",
     "nameLabel": "Plan name",
-    "namePlaceholder": "e.g. My Hifz Journey",
+    "namePlaceholder": "e.g. My Quran Journey",
     "cadenceLabel": "Choose a cadence",
     "startDateLabel": "Start date",
     "create": "Create plan",
@@ -101,15 +94,18 @@
     "title": "Plan details",
     "statsHeading": "Statistics",
     "daysLogged": "Days logged",
-    "versesMemorized": "Verses memorized",
+    "versesMemorized": "Verses completed",
     "historyHeading": "History",
     "noHistory": "No entries logged yet.",
     "editName": "Edit name",
+    "editEntryTitle": "Edit entry",
+    "editEntryHint": "Tap an entry to edit or remove it.",
+    "deleteEntry": "Delete entry",
     "makeDefault": "Set as default",
     "viewSchedule": "View full schedule",
     "viewLog": "View plan log",
     "cadenceHeading": "Cadence",
-    "cadenceNote": "Changing the cadence keeps the verses you've already memorized and recalculates your target date and projection.",
+    "cadenceNote": "Changing the cadence keeps the verses you've already completed and recalculates your target date and projection.",
     "cadenceChanged": "Cadence changed to {{template}}"
   },
   "schedule": {
@@ -141,7 +137,7 @@
     "noPlans": "No plans available",
     "restartNote": "You may need to reopen the app to fully mirror the layout for the new language.",
     "aboutHeading": "About",
-    "aboutBody": "Track the cadence of your Quran memorization and see when you will finish at your current pace.",
+    "aboutBody": "Track the cadence of your Quran reading or memorization and see when you will finish at your current pace.",
     "dataNote": "Your data is stored locally on this device."
   },
   "log": {
@@ -156,6 +152,7 @@
       "plan_template_changed": "Changed cadence to {{template}}",
       "plan_set_default": "Set as default plan",
       "plan_deleted": "Deleted plan",
+      "progress_deleted": "Removed an entry",
       "logged_full": "Achieved the goal — {{verses}} verses",
       "logged_partial": "Partial — {{verses}} verses",
       "logged_missed": "Missed the day"

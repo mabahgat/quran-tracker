@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
@@ -14,12 +14,12 @@ import { useToast } from '@/components/Toast';
 import { Radius, Spacing } from '@/constants/theme';
 import { TOTAL_AYAH } from '@/domain/quran';
 import { dailyTargetFor, TEMPLATES } from '@/domain/templates';
-import { ProgressStatus } from '@/domain/types';
+import { ProgressEntry, ProgressStatus } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { usePlan } from '@/state/usePlan';
-import { formatPosition } from '@/utils/format';
+import { formatPosition, templateName } from '@/utils/format';
 
 const STATUS_TONE: Record<ProgressStatus, 'success' | 'warning' | 'danger'> = {
   full: 'success',
@@ -31,15 +31,19 @@ export default function PlanDetailScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const { textAlign, flexRow, language } = useDirection();
+  const { textAlign, flexRow, language, isRTL } = useDirection();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { plan, entries, projection, reload } = usePlan(id);
+  const { plan, entries, projection, reload, editEntry, deleteEntry } = usePlan(id);
   const { setDefaultPlan, renamePlan, changePlanTemplate } = useApp();
   const { showToast } = useToast();
 
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
   const [nameError, setNameError] = useState(false);
+
+  const [editingEntry, setEditingEntry] = useState<ProgressEntry | null>(null);
+  const [entryStatus, setEntryStatus] = useState<ProgressStatus>('full');
+  const [entryVerses, setEntryVerses] = useState('');
 
   if (!plan || !projection) {
     return (
@@ -62,7 +66,7 @@ export default function PlanDetailScreen() {
     if (templateId === plan.templateId) return;
     await changePlanTemplate(plan.id, templateId);
     await reload();
-    showToast(t('detail.cadenceChanged', { template: t(`templates.${templateId}`) }));
+    showToast(t('detail.cadenceChanged', { template: templateName(templateId, language) }));
   };
 
   const startEdit = () => {
@@ -86,6 +90,30 @@ export default function PlanDetailScreen() {
     await reload();
     setEditing(false);
   };
+
+  const openEntry = (entry: ProgressEntry) => {
+    setEditingEntry(entry);
+    setEntryStatus(entry.status);
+    setEntryVerses(entry.status === 'partial' ? String(entry.verses) : '');
+  };
+
+  const closeEntry = () => setEditingEntry(null);
+
+  const saveEntry = async () => {
+    if (!editingEntry) return;
+    const parsed = parseInt(entryVerses, 10);
+    await editEntry(editingEntry.id, entryStatus, Number.isFinite(parsed) ? parsed : 0);
+    setEditingEntry(null);
+  };
+
+  const removeEntry = async () => {
+    if (!editingEntry) return;
+    await deleteEntry(editingEntry.id);
+    setEditingEntry(null);
+  };
+
+  const entryVariant = (status: ProgressStatus) =>
+    entryStatus === status ? ('primary' as const) : ('secondary' as const);
 
   const history = [...entries].reverse();
 
@@ -129,7 +157,7 @@ export default function PlanDetailScreen() {
           </View>
         )}
         <View style={[styles.meta, { flexDirection: flexRow }]}>
-          <Badge tone="primary" label={t(`templates.${plan.templateId}`)} />
+          <Badge tone="primary" label={templateName(plan.templateId, language)} />
           {plan.isDefault ? <Badge tone="success" label={t('plans.defaultBadge')} /> : null}
         </View>
       </View>
@@ -189,7 +217,7 @@ export default function PlanDetailScreen() {
                 ]}>
                 <View style={styles.flexShrink}>
                   <ThemedText style={[styles.cadenceName, { textAlign }]}>
-                    {t(`templates.${template.id}`)}
+                    {templateName(template.id, language)}
                   </ThemedText>
                   <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
                     {t('templates.perDay', { n: dailyTargetFor(template.id) })}
@@ -214,19 +242,31 @@ export default function PlanDetailScreen() {
             {t('detail.noHistory')}
           </ThemedText>
         ) : (
-          history.map((entry) => (
-            <View key={entry.id} style={[styles.historyRow, { flexDirection: flexRow }]}>
-              <ThemedText style={{ textAlign }}>{entry.date}</ThemedText>
-              <View style={[styles.historyRight, { flexDirection: flexRow }]}>
-                {entry.status === 'partial' ? (
-                  <ThemedText type="small" style={{ color: theme.textSecondary }}>
-                    {entry.verses}
-                  </ThemedText>
-                ) : null}
-                <Badge tone={STATUS_TONE[entry.status]} label={t(`status.${entry.status}`)} />
-              </View>
-            </View>
-          ))
+          <>
+            <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
+              {t('detail.editEntryHint')}
+            </ThemedText>
+            {history.map((entry) => (
+              <Pressable
+                key={entry.id}
+                onPress={() => openEntry(entry)}
+                style={({ pressed }) => [
+                  styles.historyRow,
+                  { flexDirection: flexRow, opacity: pressed ? 0.6 : 1 },
+                ]}>
+                <ThemedText style={{ textAlign }}>{entry.date}</ThemedText>
+                <View style={[styles.historyRight, { flexDirection: flexRow }]}>
+                  {entry.status === 'partial' ? (
+                    <ThemedText type="small" style={{ color: theme.textSecondary }}>
+                      {entry.verses}
+                    </ThemedText>
+                  ) : null}
+                  <Badge tone={STATUS_TONE[entry.status]} label={t(`status.${entry.status}`)} />
+                  <ThemedText style={{ color: theme.textSecondary }}>{isRTL ? '‹' : '›'}</ThemedText>
+                </View>
+              </Pressable>
+            ))}
+          </>
         )}
       </Card>
 
@@ -255,6 +295,71 @@ export default function PlanDetailScreen() {
       {!plan.isDefault ? (
         <Button variant="secondary" title={t('detail.makeDefault')} onPress={makeDefault} />
       ) : null}
+
+      <Modal
+        visible={editingEntry !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={closeEntry}>
+        <Pressable style={styles.modalOverlay} onPress={closeEntry}>
+          <Pressable
+            style={[styles.modalCard, { backgroundColor: theme.background, borderColor: theme.border }]}
+            onPress={() => {}}>
+            <ThemedText style={[styles.heading, { textAlign }]}>{t('detail.editEntryTitle')}</ThemedText>
+            <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
+              {editingEntry?.date}
+            </ThemedText>
+            <View style={[styles.entryButtons, { flexDirection: flexRow }]}>
+              <Button
+                style={styles.flex}
+                title={t('status.full')}
+                variant={entryVariant('full')}
+                onPress={() => setEntryStatus('full')}
+              />
+              <Button
+                style={styles.flex}
+                title={t('status.partial')}
+                variant={entryVariant('partial')}
+                onPress={() => setEntryStatus('partial')}
+              />
+              <Button
+                style={styles.flex}
+                title={t('status.missed')}
+                variant={entryVariant('missed')}
+                onPress={() => setEntryStatus('missed')}
+              />
+            </View>
+            {entryStatus === 'partial' ? (
+              <>
+                <ThemedText style={{ textAlign }}>{t('home.partialPrompt')}</ThemedText>
+                <TextInput
+                  value={entryVerses}
+                  onChangeText={(value) => setEntryVerses(value.replace(/[^0-9]/g, ''))}
+                  keyboardType="number-pad"
+                  placeholder="0"
+                  placeholderTextColor={theme.textSecondary}
+                  style={[styles.entryInput, { color: theme.text, borderColor: theme.border, textAlign }]}
+                />
+              </>
+            ) : null}
+            <Button title={t('common.save')} onPress={saveEntry} />
+            <View style={[styles.entryButtons, { flexDirection: flexRow }]}>
+              <Button
+                style={styles.flex}
+                variant="ghost"
+                title={t('detail.deleteEntry')}
+                onPress={removeEntry}
+              />
+              <Button
+                style={styles.flex}
+                variant="ghost"
+                title={t('common.cancel')}
+                onPress={closeEntry}
+              />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </Screen>
   );
 }
@@ -331,5 +436,27 @@ const styles = StyleSheet.create({
   historyRight: {
     alignItems: 'center',
     gap: Spacing.two,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: Spacing.four,
+  },
+  modalCard: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.large,
+    padding: Spacing.four,
+    gap: Spacing.two,
+  },
+  entryButtons: {
+    gap: Spacing.two,
+  },
+  entryInput: {
+    minHeight: 48,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.medium,
+    paddingHorizontal: Spacing.three,
+    fontSize: 18,
   },
 });

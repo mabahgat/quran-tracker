@@ -10,6 +10,7 @@ import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { LANGUAGES, Language } from '@/i18n';
 import { useApp } from '@/state/AppProvider';
+import { templateName } from '@/utils/format';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -77,7 +78,7 @@ export default function SettingsScreen() {
                     <View style={styles.flexShrink}>
                       <ThemedText style={[styles.rowLabel, { textAlign }]}>{plan.name}</ThemedText>
                       <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
-                        {t(`templates.${plan.templateId}`)}
+                        {templateName(plan.templateId, language)}
                       </ThemedText>
                     </View>
                     {selected ? <Badge tone="primary" label={t('plans.defaultBadge')} /> : null}

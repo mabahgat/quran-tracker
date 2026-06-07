@@ -15,7 +15,7 @@ import { TEMPLATES } from '@/domain/templates';
 import { TemplateId } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
-import { formatPosition } from '@/utils/format';
+import { templateName, formatPosition } from '@/utils/format';
 import { todayISO } from '@/utils/date';
 
 interface Section {
@@ -87,7 +87,7 @@ export default function TemplateScheduleScreen() {
   const header = (
     <Card style={styles.summary}>
       <View style={[styles.summaryTop, { flexDirection: flexRow }]}>
-        <Badge tone="primary" label={t(`templates.${templateId}`)} />
+        <Badge tone="primary" label={templateName(templateId, language)} />
         <ThemedText type="small" style={{ color: theme.textSecondary }}>
           {t('schedule.perDay', { n: schedule.dailyTarget })}
         </ThemedText>

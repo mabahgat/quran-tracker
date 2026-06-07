@@ -14,6 +14,10 @@ export interface QuranPosition {
 export type ProgressStatus = 'full' | 'partial' | 'missed';
 
 export type TemplateId =
+  | '10-days'
+  | '1-month'
+  | '2-months'
+  | '3-months'
   | '100-days'
   | 'incremental-100-days'
   | '6-months'
@@ -82,7 +86,8 @@ export type EventType =
   | 'plan_template_changed'
   | 'plan_set_default'
   | 'plan_deleted'
-  | 'progress_logged';
+  | 'progress_logged'
+  | 'progress_deleted';
 
 /** Type-specific payload for an event, stored as JSON. Values are kept primitive
  *  so the log stays portable and human-readable. */

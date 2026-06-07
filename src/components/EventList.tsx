@@ -4,10 +4,11 @@ import { SectionList, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-import { AppEvent, EventType, TemplateId } from '@/domain/types';
+import { AppEvent, EventType } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { localDateTimeParts } from '@/utils/date';
+import { templateName } from '@/utils/format';
 
 const ICONS: Record<EventType, string> = {
   plan_created: '🆕',
@@ -16,6 +17,7 @@ const ICONS: Record<EventType, string> = {
   plan_set_default: '⭐',
   plan_deleted: '🗑️',
   progress_logged: '📖',
+  progress_deleted: '🧹',
 };
 
 const PROGRESS_ICON: Record<string, string> = {
@@ -45,6 +47,7 @@ export function eventIcon(event: AppEvent): string {
 
 export function useEventTitle() {
   const { t } = useTranslation();
+  const { language } = useDirection();
   return (event: AppEvent): string => {
     switch (event.type) {
       case 'plan_renamed':
@@ -54,7 +57,7 @@ export function useEventTitle() {
         });
       case 'plan_template_changed':
         return t('log.event.plan_template_changed', {
-          template: t(`templates.${event.details.toTemplateId as TemplateId}`),
+          template: templateName(String(event.details.toTemplateId ?? ''), language),
         });
       case 'progress_logged': {
         const status = String(event.details.status);

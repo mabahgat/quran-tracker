@@ -2,7 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useRepositories } from '@/data/RepositoryProvider';
-import { progressLoggedEvent } from '@/domain/events';
+import { progressDeletedEvent, progressLoggedEvent } from '@/domain/events';
 import { getExplicitSchedule, nextScheduledChunk } from '@/domain/explicitSchedule';
 import { computeProjection, ProjectionResult } from '@/domain/projection';
 import { totalMemorized, versesForStatus } from '@/domain/progress';
@@ -24,6 +24,11 @@ export interface UsePlanResult {
   loading: boolean;
   reload: () => Promise<void>;
   log: (status: ProgressStatus, verses?: number, date?: string) => Promise<void>;
+  /** Correct a previously logged entry, recomputing the credited verses for its
+   *  own date (so a "Full" correction uses the right goal for that day). */
+  editEntry: (entryId: string, status: ProgressStatus, verses?: number) => Promise<void>;
+  /** Remove a previously logged entry (e.g. one added by mistake). */
+  deleteEntry: (entryId: string) => Promise<void>;
 }
 
 export function usePlan(planId: string | null | undefined): UsePlanResult {
@@ -91,6 +96,39 @@ export function usePlan(planId: string | null | undefined): UsePlanResult {
     [repositories, plan, reload, dailyGoal],
   );
 
+  const editEntry = useCallback(
+    async (entryId: string, status: ProgressStatus, verses = 0) => {
+      if (!plan) return;
+      const entry = entries.find((item) => item.id === entryId);
+      if (!entry) return;
+      // The "Full" goal for a past day is the schedule chunk that begins at the
+      // progress reached before that date (or the flat target for computed plans),
+      // so corrections credit the same amount the day would have credited live.
+      const memorizedBefore = totalMemorized(entries.filter((item) => item.date < entry.date));
+      const goal = schedule
+        ? nextScheduledChunk(schedule, memorizedBefore)?.goalVerses ?? 0
+        : plan.dailyTarget;
+      const credited = versesForStatus(status, goal, verses);
+      await repositories.progress.upsert({ planId: plan.id, date: entry.date, status, verses: credited });
+      await repositories.events.add(progressLoggedEvent(plan, status, credited, entry.date));
+      await reload();
+    },
+    [repositories, plan, entries, schedule, reload],
+  );
+
+  const deleteEntry = useCallback(
+    async (entryId: string) => {
+      if (!plan) return;
+      const entry = entries.find((item) => item.id === entryId);
+      await repositories.progress.remove(entryId);
+      if (entry) {
+        await repositories.events.add(progressDeletedEvent(plan, entry.date));
+      }
+      await reload();
+    },
+    [repositories, plan, entries, reload],
+  );
+
   const todayEntry = useMemo(
     () => entries.find((entry) => entry.date === today) ?? null,
     [entries, today],
@@ -111,5 +149,7 @@ export function usePlan(planId: string | null | undefined): UsePlanResult {
     loading,
     reload,
     log,
+    editEntry,
+    deleteEntry,
   };
 }

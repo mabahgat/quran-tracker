@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "حفظ القرآن"
+    "title": "متتبع القرآن"
   },
   "tabs": {
     "home": "الرئيسية",
@@ -19,13 +19,6 @@
     "none": "لا يوجد"
   },
   "templates": {
-    "100-days": "100 يوم",
-    "incremental-100-days": "100 يوم تدريجي",
-    "6-months": "6 أشهر",
-    "incremental-6-months": "6 أشهر تدريجي",
-    "1-year": "سنة",
-    "incremental-1-year": "سنة تدريجي",
-    "2-years": "سنتان",
     "perDay": "{{n}} آية يومياً",
     "scheduledBadge": "خطة يومية مفصلة"
   },
@@ -36,18 +29,18 @@
   },
   "home": {
     "noDefaultTitle": "لا توجد خطة افتراضية",
-    "noDefaultBody": "أنشئ خطة وحددها كافتراضية لتتابع وتيرة حفظك اليومية هنا.",
+    "noDefaultBody": "أنشئ خطة وحددها كافتراضية لتتابع وتيرتك اليومية هنا.",
     "createPlan": "إنشاء خطة",
     "todayHeading": "اليوم",
-    "todayQuestion": "كيف كان حفظك اليوم؟",
+    "todayQuestion": "كيف كان يومك؟",
     "todayGoalLabel": "هدف اليوم",
     "todayGoalShort": "اليوم: {{n}} آية",
-    "upToLabel": "احفظ حتى",
+    "upToLabel": "الوصول إلى",
     "versesCount": "{{n}} آية",
     "logFull": "كامل",
     "logPartial": "جزئي",
     "logMissed": "فائت",
-    "partialPrompt": "كم آية حفظت اليوم؟",
+    "partialPrompt": "كم آية أنجزت اليوم؟",
     "partialByVerses": "بعدد الآيات",
     "partialByPosition": "بالموضع",
     "selectSurahTitle": "اختر السورة",
@@ -63,7 +56,7 @@
     "changeEntry": "تغيير",
     "currentPosition": "الموضع الحالي",
     "notStarted": "لم يبدأ بعد",
-    "nextUp": "التالي للحفظ",
+    "nextUp": "التالي",
     "viewScheduleLink": "الجدول",
     "progress": "التقدم",
     "versesOf": "{{done}} / {{total}} آية",
@@ -75,7 +68,7 @@
     "behind": "متأخر بـ {{n}} يوم عن الهدف",
     "onTrack": "ضمن الهدف تماماً",
     "needProgress": "سجّل يوماً واحداً على الأقل لرؤية تاريخ الانتهاء المتوقع.",
-    "complete": "اكتمل الحفظ — ما شاء الله!"
+    "complete": "اكتمل — ما شاء الله!"
   },
   "plans": {
     "title": "الخطط",
@@ -90,7 +83,7 @@
   "newPlan": {
     "title": "خطة جديدة",
     "nameLabel": "اسم الخطة",
-    "namePlaceholder": "مثال: رحلة حفظي",
+    "namePlaceholder": "مثال: رحلتي مع القرآن",
     "cadenceLabel": "اختر الوتيرة",
     "startDateLabel": "تاريخ البدء",
     "create": "إنشاء الخطة",
@@ -101,15 +94,18 @@
     "title": "تفاصيل الخطة",
     "statsHeading": "الإحصائيات",
     "daysLogged": "الأيام المسجلة",
-    "versesMemorized": "الآيات المحفوظة",
+    "versesMemorized": "الآيات المنجزة",
     "historyHeading": "السجل",
     "noHistory": "لا توجد إدخالات بعد.",
     "editName": "تعديل الاسم",
+    "editEntryTitle": "تعديل الإدخال",
+    "editEntryHint": "اضغط على إدخال لتعديله أو حذفه.",
+    "deleteEntry": "حذف الإدخال",
     "makeDefault": "تعيين كافتراضية",
     "viewSchedule": "عرض الجدول الكامل",
     "viewLog": "عرض سجل الخطة",
     "cadenceHeading": "الوتيرة",
-    "cadenceNote": "تغيير الوتيرة يحافظ على الآيات التي حفظتها بالفعل ويعيد حساب التاريخ المستهدف والتوقع.",
+    "cadenceNote": "تغيير الوتيرة يحافظ على الآيات التي أنجزتها بالفعل ويعيد حساب التاريخ المستهدف والتوقع.",
     "cadenceChanged": "تم تغيير الوتيرة إلى {{template}}"
   },
   "schedule": {
@@ -141,7 +137,7 @@
     "noPlans": "لا توجد خطط",
     "restartNote": "قد تحتاج إلى إعادة فتح التطبيق لعكس التخطيط بالكامل للغة الجديدة.",
     "aboutHeading": "حول التطبيق",
-    "aboutBody": "تابع وتيرة حفظك للقرآن الكريم واعرف موعد انتهائك حسب وتيرتك الحالية.",
+    "aboutBody": "تابع وتيرتك في قراءة أو حفظ القرآن الكريم واعرف موعد انتهائك حسب وتيرتك الحالية.",
     "dataNote": "بياناتك مخزّنة محلياً على هذا الجهاز."
   },
   "log": {
@@ -156,6 +152,7 @@
       "plan_template_changed": "تغيير الوتيرة إلى {{template}}",
       "plan_set_default": "تعيين كخطة افتراضية",
       "plan_deleted": "حذف الخطة",
+      "progress_deleted": "حذف إدخال",
       "logged_full": "تحقق الهدف — {{verses}} آية",
       "logged_partial": "جزئي — {{verses}} آية",
       "logged_missed": "فات اليوم"

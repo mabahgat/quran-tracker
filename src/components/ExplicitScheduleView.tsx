@@ -13,7 +13,7 @@ import { TemplateId } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { addDays } from '@/utils/date';
-import { formatPosition } from '@/utils/format';
+import { formatPosition, templateName } from '@/utils/format';
 
 interface Section {
   phase: number;
@@ -50,7 +50,7 @@ export function ExplicitScheduleView({ schedule, templateId, startDate }: Explic
   const header = (
     <Card style={styles.summary}>
       <View style={[styles.summaryTop, { flexDirection: flexRow }]}>
-        <Badge tone="primary" label={t(`templates.${templateId}`)} />
+        <Badge tone="primary" label={templateName(templateId, language)} />
         <ThemedText type="small" style={{ color: theme.textSecondary }}>
           {schedule.source}
         </ThemedText>
