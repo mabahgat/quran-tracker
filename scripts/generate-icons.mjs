@@ -122,6 +122,18 @@ async function png(svg, file, size) {
   console.log(`  ${file} (${size}×${size})`);
 }
 
+// watchOS app icons must be fully opaque (no alpha channel). Flatten onto the
+// brand green and strip alpha so the watch target installs and renders correctly.
+async function opaquePng(svg, file, size) {
+  await sharp(Buffer.from(svg))
+    .resize(size, size)
+    .flatten({ background: '#1F7A53' })
+    .removeAlpha()
+    .png()
+    .toFile(out(file));
+  console.log(`  ${file} (${size}×${size}, opaque)`);
+}
+
 async function main() {
   await mkdir(out('assets/icon-source'), { recursive: true });
   // Persist the SVG sources of truth.
@@ -141,6 +153,9 @@ async function main() {
 
   // Splash mark (white glyph on transparent; splash bg color set in app.json).
   await png(glyphSvg({ mono: true, scale: 1.0, color: '#ffffff' }), 'assets/images/splash-icon.png', 512);
+
+  // Apple Watch app icon — opaque (watchOS forbids alpha), lives in the target.
+  await opaquePng(full, 'targets/watch/icon.png', 1024);
 
   console.log('Done.');
 }
