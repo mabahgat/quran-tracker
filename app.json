@@ -14,9 +14,10 @@
     },
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.anonymous.memory-app"
+      "bundleIdentifier": "com.imabtech.memory-app"
     },
     "android": {
+      "package": "com.imabtech.memory-app",
       "adaptiveIcon": {
         "backgroundColor": "#1F7A53",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
