@@ -78,7 +78,11 @@
     "setDefault": "تعيين كافتراضية",
     "deleteConfirmTitle": "حذف الخطة",
     "deleteConfirmBody": "سيؤدي هذا إلى حذف الخطة وكل تقدمها. لا يمكن التراجع عن ذلك.",
-    "startedOn": "بدأت في {{date}}"
+    "startedOn": "بدأت في {{date}}",
+    "import": "استيراد خطة",
+    "importErrorTitle": "فشل الاستيراد",
+    "importError": "تعذّرت قراءة الملف. الرجاء اختيار ملف خطة صالح.",
+    "imported": "تم استيراد ”{{name}}“"
   },
   "newPlan": {
     "title": "خطة جديدة",
@@ -108,6 +112,8 @@
     "makeDefault": "تعيين كافتراضية",
     "viewSchedule": "عرض الجدول الكامل",
     "viewLog": "عرض سجل الخطة",
+    "exportPlan": "تصدير الخطة",
+    "exportError": "تعذّر تصدير هذه الخطة.",
     "cadenceHeading": "الوتيرة",
     "cadenceNote": "تغيير الوتيرة يحافظ على الآيات التي أنجزتها بالفعل ويعيد حساب التاريخ المستهدف والتوقع.",
     "cadenceChanged": "تم تغيير الوتيرة إلى {{template}}"
@@ -177,6 +183,7 @@
     "deletedPlan": "{{name}} (محذوفة)",
     "event": {
       "plan_created": "إنشاء خطة",
+      "plan_imported": "استيراد خطة",
       "plan_renamed": "إعادة التسمية من ”{{from}}“ إلى ”{{to}}“",
       "plan_template_changed": "تغيير الوتيرة إلى {{template}}",
       "plan_set_default": "تعيين كخطة افتراضية",

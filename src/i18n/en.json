@@ -78,7 +78,11 @@
     "setDefault": "Set as default",
     "deleteConfirmTitle": "Delete plan",
     "deleteConfirmBody": "This will delete the plan and all of its progress. This cannot be undone.",
-    "startedOn": "Started {{date}}"
+    "startedOn": "Started {{date}}",
+    "import": "Import plan",
+    "importErrorTitle": "Import failed",
+    "importError": "Could not read that file. Please pick a valid plan export.",
+    "imported": "Imported “{{name}}”"
   },
   "newPlan": {
     "title": "New plan",
@@ -108,6 +112,8 @@
     "makeDefault": "Set as default",
     "viewSchedule": "View full schedule",
     "viewLog": "View plan log",
+    "exportPlan": "Export plan",
+    "exportError": "Could not export this plan.",
     "cadenceHeading": "Cadence",
     "cadenceNote": "Changing the cadence keeps the verses you've already completed and recalculates your target date and projection.",
     "cadenceChanged": "Cadence changed to {{template}}"
@@ -177,6 +183,7 @@
     "deletedPlan": "{{name}} (deleted)",
     "event": {
       "plan_created": "Created plan",
+      "plan_imported": "Imported plan",
       "plan_renamed": "Renamed from “{{from}}” to “{{to}}”",
       "plan_template_changed": "Changed cadence to {{template}}",
       "plan_set_default": "Set as default plan",

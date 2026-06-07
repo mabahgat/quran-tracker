@@ -17,6 +17,15 @@ export function planCreatedEvent(plan: Plan): EventDraft {
   };
 }
 
+export function planImportedEvent(plan: Plan, entryCount: number): EventDraft {
+  return {
+    type: 'plan_imported',
+    planId: plan.id,
+    planName: plan.name,
+    details: { templateId: plan.templateId, entries: entryCount },
+  };
+}
+
 export function planRenamedEvent(plan: Plan, from: string, to: string): EventDraft {
   return {
     type: 'plan_renamed',

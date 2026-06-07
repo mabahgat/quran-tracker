@@ -13,6 +13,7 @@ import { localDateTimeParts } from '@/utils/date';
 
 const ICONS: Record<EventType, string> = {
   plan_created: '🆕',
+  plan_imported: '📥',
   plan_renamed: '✏️',
   plan_template_changed: '🔄',
   plan_set_default: '⭐',

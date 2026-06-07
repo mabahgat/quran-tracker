@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
@@ -19,6 +19,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { usePlan } from '@/state/usePlan';
 import { formatPosition, templateNameOf } from '@/utils/format';
+import { planFileName, shareJson } from '@/utils/scheduleShare';
 
 const STATUS_TONE: Record<ProgressStatus, 'success' | 'warning' | 'danger'> = {
   full: 'success',
@@ -33,7 +34,8 @@ export default function PlanDetailScreen() {
   const { textAlign, flexRow, language, isRTL } = useDirection();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { plan, entries, projection, reload, editEntry, deleteEntry } = usePlan(id);
-  const { setDefaultPlan, renamePlan, changePlanTemplate, templates, templateLabel } = useApp();
+  const { setDefaultPlan, renamePlan, changePlanTemplate, templates, templateLabel, exportPlanData } =
+    useApp();
   const { showToast } = useToast();
 
   const [editing, setEditing] = useState(false);
@@ -59,6 +61,15 @@ export default function PlanDetailScreen() {
   const makeDefault = async () => {
     await setDefaultPlan(plan.id);
     await reload();
+  };
+
+  const exportPlan = async () => {
+    try {
+      const json = await exportPlanData(plan.id);
+      await shareJson(planFileName(plan.name), json);
+    } catch {
+      Alert.alert(t('detail.exportPlan'), t('detail.exportError'));
+    }
   };
 
   const selectTemplate = async (templateId: typeof plan.templateId) => {
@@ -290,6 +301,8 @@ export default function PlanDetailScreen() {
         title={t('detail.viewLog')}
         onPress={() => router.push({ pathname: '/plan-log/[id]', params: { id: plan.id } })}
       />
+
+      <Button variant="secondary" title={t('detail.exportPlan')} onPress={exportPlan} />
 
       {!plan.isDefault ? (
         <Button variant="secondary" title={t('detail.makeDefault')} onPress={makeDefault} />

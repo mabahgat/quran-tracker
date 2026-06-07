@@ -6,11 +6,13 @@ import { NewUserSchedule } from '@/data/repositories/types';
 import {
   planCreatedEvent,
   planDeletedEvent,
+  planImportedEvent,
   planRenamedEvent,
   planSetDefaultEvent,
   planTemplateChangedEvent,
 } from '@/domain/events';
 import { getTemplate, TEMPLATES } from '@/domain/templates';
+import { ParsedPlanImport, serializePlan } from '@/domain/planTransfer';
 import { userScheduleToTemplate } from '@/domain/userSchedule';
 import { CadenceTemplate, Plan, TemplateId, UserSchedule } from '@/domain/types';
 import { detectDeviceLanguage, initI18n, isRTL, Language } from '@/i18n';
@@ -42,6 +44,10 @@ interface AppContextValue {
   setDefaultPlan: (id: string) => Promise<void>;
   importSchedule: (input: NewUserSchedule) => Promise<UserSchedule>;
   deleteUserSchedule: (id: string) => Promise<void>;
+  /** Serializes a plan and all its progress to a portable JSON string. */
+  exportPlanData: (id: string) => Promise<string>;
+  /** Recreates a plan (and its progress) from a parsed export. */
+  importPlan: (parsed: ParsedPlanImport) => Promise<Plan>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -233,6 +239,49 @@ export function AppProvider({
     [repositories, refreshUserSchedules],
   );
 
+  const exportPlanData = useCallback(
+    async (id: string) => {
+      const plan = await repositories.plans.get(id);
+      if (!plan) {
+        throw new Error(`Plan not found: ${id}`);
+      }
+      const entries = await repositories.progress.listByPlan(id);
+      return serializePlan(plan, entries);
+    },
+    [repositories],
+  );
+
+  const importPlan = useCallback(
+    async (parsed: ParsedPlanImport) => {
+      // Recreate the plan with a fresh id (avoids collisions) and a reset default
+      // flag. The template snapshot carries the schedule, so user-defined plans
+      // re-import losslessly even on a device that never had the source schedule.
+      const plan = await repositories.plans.create({
+        name: parsed.name,
+        templateId: parsed.templateId,
+        startDate: parsed.startDate,
+        dailyTarget: parsed.dailyTarget,
+        templateSnapshot: parsed.templateSnapshot,
+      });
+      for (const entry of parsed.entries) {
+        await repositories.progress.upsert({
+          planId: plan.id,
+          date: entry.date,
+          status: entry.status,
+          verses: entry.verses,
+        });
+      }
+      await repositories.events.add(planImportedEvent(plan, parsed.entries.length));
+      const existingDefault = await repositories.plans.getDefault();
+      if (!existingDefault) {
+        await repositories.plans.setDefault(plan.id);
+      }
+      await refreshPlans();
+      return plan;
+    },
+    [repositories, refreshPlans],
+  );
+
   const value = useMemo<AppContextValue>(
     () => ({
       language,
@@ -251,8 +300,10 @@ export function AppProvider({
       setDefaultPlan,
       importSchedule,
       deleteUserSchedule,
+      exportPlanData,
+      importPlan,
     }),
-    [language, setLanguage, plans, defaultPlan, templates, userSchedules, templateLabel, refreshPlans, createPlan, renamePlan, changePlanTemplate, deletePlan, setDefaultPlan, importSchedule, deleteUserSchedule],
+    [language, setLanguage, plans, defaultPlan, templates, userSchedules, templateLabel, refreshPlans, createPlan, renamePlan, changePlanTemplate, deletePlan, setDefaultPlan, importSchedule, deleteUserSchedule, exportPlanData, importPlan],
   );
 
   if (!ready) {

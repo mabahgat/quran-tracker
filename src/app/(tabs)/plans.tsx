@@ -8,24 +8,48 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/themed-text';
+import { useToast } from '@/components/Toast';
 import { Radius, Spacing } from '@/constants/theme';
+import { parsePlanExport } from '@/domain/planTransfer';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { templateNameOf } from '@/utils/format';
+import { pickJson } from '@/utils/scheduleShare';
 
 export default function PlansScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const theme = useTheme();
   const { textAlign, flexRow, language, isRTL } = useDirection();
-  const { plans, setDefaultPlan, deletePlan } = useApp();
+  const { plans, setDefaultPlan, deletePlan, importPlan } = useApp();
+  const { showToast } = useToast();
 
   const confirmDelete = (id: string) => {
     Alert.alert(t('plans.deleteConfirmTitle'), t('plans.deleteConfirmBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('common.delete'), style: 'destructive', onPress: () => deletePlan(id) },
     ]);
+  };
+
+  const startImport = async () => {
+    let picked;
+    try {
+      picked = await pickJson();
+    } catch {
+      Alert.alert(t('plans.importErrorTitle'), t('plans.importError'));
+      return;
+    }
+    if (!picked) return;
+    try {
+      const parsed = parsePlanExport(picked.content);
+      const plan = await importPlan(parsed);
+      showToast(t('plans.imported', { name: plan.name }));
+      router.push({ pathname: '/plans/[id]', params: { id: plan.id } });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('plans.importError');
+      Alert.alert(t('plans.importErrorTitle'), message);
+    }
   };
 
   const renderDeleteAction = (id: string) => (
@@ -42,6 +66,7 @@ export default function PlansScreen() {
   return (
     <Screen>
       <Button title={t('plans.new')} onPress={() => router.push('/plans/new')} />
+      <Button variant="secondary" title={t('plans.import')} onPress={startImport} />
 
       {plans.length === 0 ? (
         <Card>

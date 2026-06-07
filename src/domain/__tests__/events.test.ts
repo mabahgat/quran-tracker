@@ -1,6 +1,7 @@
 import {
   planCreatedEvent,
   planDeletedEvent,
+  planImportedEvent,
   planRenamedEvent,
   planSetDefaultEvent,
   planTemplateChangedEvent,
@@ -36,6 +37,13 @@ describe('event factories', () => {
       planName: 'My Hifz',
       details: { templateId: '100-days' },
     });
+  });
+
+  it('builds a plan_imported event carrying the entry count', () => {
+    const event = planImportedEvent(plan, 12);
+    expect(event.type).toBe('plan_imported');
+    expect(event.planId).toBe('plan-1');
+    expect(event.details).toEqual({ templateId: '100-days', entries: 12 });
   });
 
   it('builds a plan_renamed event carrying both names', () => {

@@ -136,6 +136,7 @@ export interface ProgressEntry {
 
 export type EventType =
   | 'plan_created'
+  | 'plan_imported'
   | 'plan_renamed'
   | 'plan_template_changed'
   | 'plan_set_default'
