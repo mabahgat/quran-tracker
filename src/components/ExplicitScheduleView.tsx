@@ -8,6 +8,7 @@ import { InfoRow } from '@/components/InfoRow';
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { ExplicitSchedule, ExplicitScheduleDay } from '@/domain/explicitSchedule';
+import { cumulativeIndexOf } from '@/domain/quran';
 import { TemplateId } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
@@ -87,6 +88,7 @@ export function ExplicitScheduleView({ schedule, templateId, startDate }: Explic
         renderItem={({ item }) => {
           const date = addDays(startDate, item.day - 1);
           const pagesLabel = item.pages === 1 ? t('schedule.onePage') : t('schedule.pages', { n: item.pages });
+          const verses = cumulativeIndexOf(item.to) - cumulativeIndexOf(item.from) + 1;
           return (
             <View style={[styles.dayRow, { borderColor: theme.border }]}>
               <View style={[styles.dayTop, { flexDirection: flexRow }]}>
@@ -112,6 +114,7 @@ export function ExplicitScheduleView({ schedule, templateId, startDate }: Explic
               </View>
               <View style={[styles.metaRow, { flexDirection: flexRow }]}>
                 <Badge tone={item.isReview ? 'warning' : 'primary'} label={pagesLabel} />
+                <Badge label={t('schedule.versesThisDay', { n: verses })} />
                 <ThemedText type="small" style={{ color: theme.textSecondary }}>
                   {t('schedule.page', { n: item.from.page })} {arrow}{' '}
                   {t('schedule.page', { n: item.to.page })}
