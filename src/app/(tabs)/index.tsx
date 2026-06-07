@@ -26,7 +26,7 @@ import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { usePlan } from '@/state/usePlan';
-import { formatPosition, surahName, templateName } from '@/utils/format';
+import { formatPosition, surahName, templateNameOf } from '@/utils/format';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -179,7 +179,7 @@ export default function HomeScreen() {
             styles.headerMeta,
             { flexDirection: flexRow, opacity: pressed ? 0.6 : 1 },
           ]}>
-          <Badge tone="primary" label={templateName(plan.templateId, language)} />
+          <Badge tone="primary" label={templateNameOf(plan.templateSnapshot, language)} />
           <ThemedText type="small" style={{ color: theme.textSecondary }}>
             {isScheduled
               ? t('home.todayGoalShort', { n: dailyGoal })

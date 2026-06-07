@@ -13,7 +13,7 @@ export interface QuranPosition {
 
 export type ProgressStatus = 'full' | 'partial' | 'missed';
 
-export type TemplateId =
+export type BuiltInTemplateId =
   | '10-days'
   | '1-month'
   | '2-months'
@@ -25,6 +25,40 @@ export type TemplateId =
   | '1-year'
   | 'incremental-1-year'
   | '2-years';
+
+/**
+ * Identifies a cadence template. Built-in templates use the known literal ids
+ * (which keep autocomplete); user-defined schedules use a generated id, so any
+ * string is also accepted.
+ */
+export type TemplateId = BuiltInTemplateId | (string & {});
+
+/** A single point in an explicit day-by-day schedule. `page` is optional because
+ *  user-imported schedules may not carry mushaf page numbers. */
+export interface SchedulePoint {
+  surah: number;
+  ayah: number;
+  page?: number;
+}
+
+/** One day of an explicit, day-by-day timetable. */
+export interface ExplicitScheduleDay {
+  day: number;
+  phase: number;
+  isReview: boolean;
+  pages?: number;
+  from: SchedulePoint;
+  to: SchedulePoint;
+}
+
+/** An explicit, fully-enumerated timetable (expert resource or user-imported). */
+export interface ExplicitSchedule {
+  templateId: TemplateId;
+  source: string;
+  totalDays: number;
+  totalPages?: number;
+  days: ExplicitScheduleDay[];
+}
 
 export interface TemplateNames {
   en: string;
@@ -51,6 +85,26 @@ export interface CadenceTemplate {
   durationDays: number;
   dailyTarget: number;
   totalVerses: number;
+  /** True for schedules the user imported (not shipped resource files). */
+  userDefined?: boolean;
+  /** Provenance label (e.g. the imported file name) for user-defined schedules. */
+  source?: string;
+  /** Embedded day-by-day timetable for scheduled templates. Snapshotted onto a
+   *  plan so the plan keeps working even if a user-defined schedule is deleted. */
+  schedule?: ExplicitScheduleDay[];
+}
+
+/**
+ * A schedule the user imported from CSV and saved on the device. It is converted
+ * to a CadenceTemplate (for the picker) and an ExplicitSchedule (for the daily
+ * goal and the schedule view) on demand.
+ */
+export interface UserSchedule {
+  id: TemplateId;
+  name: string;
+  source: string;
+  days: ExplicitScheduleDay[];
+  createdAt: string;
 }
 
 export interface Plan {

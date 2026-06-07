@@ -1,15 +1,17 @@
-import { AppEvent, Plan, ProgressEntry } from '../../domain/types';
+import { AppEvent, Plan, ProgressEntry, UserSchedule } from '../../domain/types';
 import { sortEventsDesc } from '../../domain/events';
 import {
   EventRepository,
   NewAppEvent,
   NewPlan,
   NewProgressEntry,
+  NewUserSchedule,
   PlanChanges,
   PlanRepository,
   ProgressRepository,
   Repositories,
   SettingsRepository,
+  UserScheduleRepository,
 } from './types';
 
 function fallbackId(): string {
@@ -29,6 +31,7 @@ export function createMemoryRepositories(idGen: () => string = fallbackId): Repo
   const progress = new Map<string, ProgressEntry>();
   const settings = new Map<string, string>();
   const events = new Map<string, AppEvent>();
+  const userSchedules = new Map<string, UserSchedule>();
 
   const now = () => new Date().toISOString();
 
@@ -162,5 +165,37 @@ export function createMemoryRepositories(idGen: () => string = fallbackId): Repo
     },
   };
 
-  return { plans: planRepo, progress: progressRepo, settings: settingsRepo, events: eventsRepo };
+  const userSchedulesRepo: UserScheduleRepository = {
+    async list() {
+      return [...userSchedules.values()].sort((a, b) => {
+        if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? 1 : -1;
+        return a.id < b.id ? 1 : -1;
+      });
+    },
+    async get(id) {
+      return userSchedules.get(id) ?? null;
+    },
+    async create(input: NewUserSchedule) {
+      const schedule: UserSchedule = {
+        id: idGen(),
+        name: input.name,
+        source: input.source,
+        days: input.days,
+        createdAt: now(),
+      };
+      userSchedules.set(schedule.id, schedule);
+      return schedule;
+    },
+    async remove(id) {
+      userSchedules.delete(id);
+    },
+  };
+
+  return {
+    plans: planRepo,
+    progress: progressRepo,
+    settings: settingsRepo,
+    events: eventsRepo,
+    userSchedules: userSchedulesRepo,
+  };
 }

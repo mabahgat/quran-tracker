@@ -12,7 +12,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
-import { templateName } from '@/utils/format';
+import { templateNameOf } from '@/utils/format';
 
 export default function PlansScreen() {
   const { t } = useTranslation();
@@ -65,7 +65,7 @@ export default function PlansScreen() {
                   {plan.isDefault ? <Badge tone="primary" label={t('plans.defaultBadge')} /> : null}
                 </View>
                 <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
-                  {templateName(plan.templateId, language)} · {t('plans.startedOn', { date: plan.startDate })}
+                  {templateNameOf(plan.templateSnapshot, language)} · {t('plans.startedOn', { date: plan.startDate })}
                 </ThemedText>
               </Pressable>
               {!plan.isDefault ? (

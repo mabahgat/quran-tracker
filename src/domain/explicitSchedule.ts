@@ -2,36 +2,21 @@ import scheduleIncremental100Days from '../resources/schedules/incremental-100-d
 import scheduleIncremental6Months from '../resources/schedules/incremental-6-months.json';
 import scheduleIncremental1Year from '../resources/schedules/incremental-1-year.json';
 import { cumulativeIndexOf, isValidPosition } from './quran';
-import { QuranPosition, TemplateId } from './types';
+import {
+  ExplicitSchedule,
+  ExplicitScheduleDay,
+  QuranPosition,
+  SchedulePoint,
+  TemplateId,
+} from './types';
+
+export type { ExplicitSchedule, ExplicitScheduleDay, SchedulePoint } from './types';
 
 const SCHEDULED_TEMPLATE_IDS: readonly TemplateId[] = [
   'incremental-100-days',
   'incremental-6-months',
   'incremental-1-year',
 ];
-
-export interface SchedulePoint {
-  surah: number;
-  ayah: number;
-  page: number;
-}
-
-export interface ExplicitScheduleDay {
-  day: number;
-  phase: number;
-  isReview: boolean;
-  pages: number;
-  from: SchedulePoint;
-  to: SchedulePoint;
-}
-
-export interface ExplicitSchedule {
-  templateId: TemplateId;
-  source: string;
-  totalDays: number;
-  totalPages: number;
-  days: ExplicitScheduleDay[];
-}
 
 function validatePoint(point: SchedulePoint, context: string): SchedulePoint {
   if (!isValidPosition({ surah: point.surah, ayah: point.ayah })) {
@@ -88,6 +73,27 @@ const EXPLICIT_SCHEDULES: Partial<Record<TemplateId, ExplicitSchedule>> = {
  *  template uses the computed (flat) schedule. */
 export function getExplicitSchedule(templateId: TemplateId): ExplicitSchedule | null {
   return EXPLICIT_SCHEDULES[templateId] ?? null;
+}
+
+/**
+ * Assembles an ExplicitSchedule from a list of days (e.g. an imported user
+ * schedule or a plan's embedded snapshot). Days are reindexed 1..n and the total
+ * page count is derived from the last day that carries page information.
+ */
+export function buildExplicitSchedule(
+  templateId: TemplateId,
+  source: string,
+  days: ExplicitScheduleDay[],
+): ExplicitSchedule {
+  const normalized = days.map((day, index) => ({ ...day, day: index + 1 }));
+  const lastWithPage = [...normalized].reverse().find((day) => day.to.page != null);
+  return {
+    templateId,
+    source,
+    totalDays: normalized.length,
+    totalPages: lastWithPage?.to.page,
+    days: normalized,
+  };
 }
 
 export interface ScheduledChunk {

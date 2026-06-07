@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { I18nManager } from 'react-native';
 
 import { useRepositories } from '@/data/RepositoryProvider';
+import { NewUserSchedule } from '@/data/repositories/types';
 import {
   planCreatedEvent,
   planDeletedEvent,
@@ -9,10 +10,12 @@ import {
   planSetDefaultEvent,
   planTemplateChangedEvent,
 } from '@/domain/events';
-import { getTemplate } from '@/domain/templates';
-import { Plan, TemplateId } from '@/domain/types';
+import { getTemplate, TEMPLATES } from '@/domain/templates';
+import { userScheduleToTemplate } from '@/domain/userSchedule';
+import { CadenceTemplate, Plan, TemplateId, UserSchedule } from '@/domain/types';
 import { detectDeviceLanguage, initI18n, isRTL, Language } from '@/i18n';
 import { todayISO } from '@/utils/date';
+import { templateNameOf } from '@/utils/format';
 
 interface CreatePlanInput {
   name: string;
@@ -26,12 +29,19 @@ interface AppContextValue {
   setLanguage: (language: Language) => Promise<boolean>;
   plans: Plan[];
   defaultPlan: Plan | null;
+  /** Built-in templates plus the user's saved schedules, for the cadence pickers. */
+  templates: CadenceTemplate[];
+  userSchedules: UserSchedule[];
+  /** Localized display name for any template id (built-in or user-defined). */
+  templateLabel: (id: TemplateId) => string;
   refreshPlans: () => Promise<void>;
   createPlan: (input: CreatePlanInput) => Promise<Plan>;
   renamePlan: (id: string, name: string) => Promise<void>;
   changePlanTemplate: (id: string, templateId: TemplateId) => Promise<void>;
   deletePlan: (id: string) => Promise<void>;
   setDefaultPlan: (id: string) => Promise<void>;
+  importSchedule: (input: NewUserSchedule) => Promise<UserSchedule>;
+  deleteUserSchedule: (id: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -48,6 +58,7 @@ export function AppProvider({
   const [language, setLanguageState] = useState<Language>('en');
   const [plans, setPlans] = useState<Plan[]>([]);
   const [defaultPlan, setDefaultPlanState] = useState<Plan | null>(null);
+  const [userSchedules, setUserSchedules] = useState<UserSchedule[]>([]);
 
   const refreshPlans = useCallback(async () => {
     const [list, def] = await Promise.all([
@@ -56,6 +67,10 @@ export function AppProvider({
     ]);
     setPlans(list);
     setDefaultPlanState(def);
+  }, [repositories]);
+
+  const refreshUserSchedules = useCallback(async () => {
+    setUserSchedules(await repositories.userSchedules.list());
   }, [repositories]);
 
   useEffect(() => {
@@ -70,13 +85,13 @@ export function AppProvider({
       }
       if (!active) return;
       setLanguageState(lang);
-      await refreshPlans();
+      await Promise.all([refreshPlans(), refreshUserSchedules()]);
       if (active) setReady(true);
     })();
     return () => {
       active = false;
     };
-  }, [repositories, refreshPlans]);
+  }, [repositories, refreshPlans, refreshUserSchedules]);
 
   const setLanguage = useCallback(
     async (next: Language) => {
@@ -93,9 +108,33 @@ export function AppProvider({
     [repositories],
   );
 
+  const templates = useMemo<CadenceTemplate[]>(
+    () => [...TEMPLATES, ...userSchedules.map(userScheduleToTemplate)],
+    [userSchedules],
+  );
+
+  const templateLabel = useCallback(
+    (id: TemplateId) => {
+      const template = templates.find((t) => t.id === id);
+      return template ? templateNameOf(template, language) : id;
+    },
+    [templates, language],
+  );
+
+  // Resolves the full template definition for a plan snapshot, reading a
+  // user-defined schedule straight from storage so it is never stale.
+  const resolveTemplate = useCallback(
+    async (id: TemplateId): Promise<CadenceTemplate> => {
+      const userSchedule = await repositories.userSchedules.get(id);
+      if (userSchedule) return userScheduleToTemplate(userSchedule);
+      return getTemplate(id);
+    },
+    [repositories],
+  );
+
   const createPlan = useCallback(
     async (input: CreatePlanInput) => {
-      const snapshot = getTemplate(input.templateId);
+      const snapshot = await resolveTemplate(input.templateId);
       const plan = await repositories.plans.create({
         name: input.name.trim(),
         templateId: input.templateId,
@@ -111,7 +150,7 @@ export function AppProvider({
       await refreshPlans();
       return plan;
     },
-    [repositories, refreshPlans],
+    [repositories, refreshPlans, resolveTemplate],
   );
 
   const renamePlan = useCallback(
@@ -129,7 +168,7 @@ export function AppProvider({
   const changePlanTemplate = useCallback(
     async (id: string, templateId: TemplateId) => {
       const existing = await repositories.plans.get(id);
-      const snapshot = getTemplate(templateId);
+      const snapshot = await resolveTemplate(templateId);
       const updated = await repositories.plans.update(id, {
         templateId,
         dailyTarget: snapshot.dailyTarget,
@@ -142,7 +181,7 @@ export function AppProvider({
       }
       await refreshPlans();
     },
-    [repositories, refreshPlans],
+    [repositories, refreshPlans, resolveTemplate],
   );
 
   const deletePlan = useCallback(
@@ -177,6 +216,23 @@ export function AppProvider({
     [repositories, refreshPlans],
   );
 
+  const importSchedule = useCallback(
+    async (input: NewUserSchedule) => {
+      const schedule = await repositories.userSchedules.create(input);
+      await refreshUserSchedules();
+      return schedule;
+    },
+    [repositories, refreshUserSchedules],
+  );
+
+  const deleteUserSchedule = useCallback(
+    async (id: string) => {
+      await repositories.userSchedules.remove(id);
+      await refreshUserSchedules();
+    },
+    [repositories, refreshUserSchedules],
+  );
+
   const value = useMemo<AppContextValue>(
     () => ({
       language,
@@ -184,14 +240,19 @@ export function AppProvider({
       setLanguage,
       plans,
       defaultPlan,
+      templates,
+      userSchedules,
+      templateLabel,
       refreshPlans,
       createPlan,
       renamePlan,
       changePlanTemplate,
       deletePlan,
       setDefaultPlan,
+      importSchedule,
+      deleteUserSchedule,
     }),
-    [language, setLanguage, plans, defaultPlan, refreshPlans, createPlan, renamePlan, changePlanTemplate, deletePlan, setDefaultPlan],
+    [language, setLanguage, plans, defaultPlan, templates, userSchedules, templateLabel, refreshPlans, createPlan, renamePlan, changePlanTemplate, deletePlan, setDefaultPlan, importSchedule, deleteUserSchedule],
   );
 
   if (!ready) {

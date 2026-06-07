@@ -1,6 +1,5 @@
 import { getSurah } from '@/domain/quran';
-import { TEMPLATES } from '@/domain/templates';
-import { Surah, QuranPosition } from '@/domain/types';
+import { CadenceTemplate, Surah, QuranPosition } from '@/domain/types';
 import { isRTL } from '@/i18n';
 
 /** Localized surah name: Arabic script in Arabic, transliteration otherwise. */
@@ -8,14 +7,10 @@ export function surahName(surah: Surah, language: string): string {
   return isRTL(language) ? surah.nameAr : surah.nameEn;
 }
 
-/**
- * Localized template name, read straight from the JSON resource so the displayed
- * label always reflects the resource files. Falls back to the raw id (e.g. for a
- * historical activity-log entry that references a template no longer present).
- */
-export function templateName(id: string, language: string): string {
-  const template = TEMPLATES.find((t) => t.id === id);
-  if (!template) return id;
+/** Localized template display name from a template (or snapshot) object. Reading
+ *  from the object keeps the label correct even for a user-defined schedule that
+ *  has since been deleted (the plan keeps its snapshot). */
+export function templateNameOf(template: Pick<CadenceTemplate, 'names'>, language: string): string {
   return isRTL(language) ? template.names.ar : template.names.en;
 }
 

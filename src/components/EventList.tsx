@@ -7,8 +7,8 @@ import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { AppEvent, EventType } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
+import { useApp } from '@/state/AppProvider';
 import { localDateTimeParts } from '@/utils/date';
-import { templateName } from '@/utils/format';
 
 const ICONS: Record<EventType, string> = {
   plan_created: '🆕',
@@ -47,7 +47,7 @@ export function eventIcon(event: AppEvent): string {
 
 export function useEventTitle() {
   const { t } = useTranslation();
-  const { language } = useDirection();
+  const { templateLabel } = useApp();
   return (event: AppEvent): string => {
     switch (event.type) {
       case 'plan_renamed':
@@ -57,7 +57,7 @@ export function useEventTitle() {
         });
       case 'plan_template_changed':
         return t('log.event.plan_template_changed', {
-          template: templateName(String(event.details.toTemplateId ?? ''), language),
+          template: templateLabel(String(event.details.toTemplateId ?? '')),
         });
       case 'progress_logged': {
         const status = String(event.details.status);

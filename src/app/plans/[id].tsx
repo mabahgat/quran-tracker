@@ -13,13 +13,12 @@ import { ThemedText } from '@/components/themed-text';
 import { useToast } from '@/components/Toast';
 import { Radius, Spacing } from '@/constants/theme';
 import { TOTAL_AYAH } from '@/domain/quran';
-import { dailyTargetFor, TEMPLATES } from '@/domain/templates';
 import { ProgressEntry, ProgressStatus } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { usePlan } from '@/state/usePlan';
-import { formatPosition, templateName } from '@/utils/format';
+import { formatPosition, templateNameOf } from '@/utils/format';
 
 const STATUS_TONE: Record<ProgressStatus, 'success' | 'warning' | 'danger'> = {
   full: 'success',
@@ -34,7 +33,7 @@ export default function PlanDetailScreen() {
   const { textAlign, flexRow, language, isRTL } = useDirection();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { plan, entries, projection, reload, editEntry, deleteEntry } = usePlan(id);
-  const { setDefaultPlan, renamePlan, changePlanTemplate } = useApp();
+  const { setDefaultPlan, renamePlan, changePlanTemplate, templates, templateLabel } = useApp();
   const { showToast } = useToast();
 
   const [editing, setEditing] = useState(false);
@@ -66,7 +65,7 @@ export default function PlanDetailScreen() {
     if (templateId === plan.templateId) return;
     await changePlanTemplate(plan.id, templateId);
     await reload();
-    showToast(t('detail.cadenceChanged', { template: templateName(templateId, language) }));
+    showToast(t('detail.cadenceChanged', { template: templateLabel(templateId) }));
   };
 
   const startEdit = () => {
@@ -157,7 +156,7 @@ export default function PlanDetailScreen() {
           </View>
         )}
         <View style={[styles.meta, { flexDirection: flexRow }]}>
-          <Badge tone="primary" label={templateName(plan.templateId, language)} />
+          <Badge tone="primary" label={templateNameOf(plan.templateSnapshot, language)} />
           {plan.isDefault ? <Badge tone="success" label={t('plans.defaultBadge')} /> : null}
         </View>
       </View>
@@ -202,7 +201,7 @@ export default function PlanDetailScreen() {
 
       <Card>
         <ThemedText style={[styles.heading, { textAlign }]}>{t('detail.cadenceHeading')}</ThemedText>
-        {TEMPLATES.map((template) => {
+        {templates.map((template) => {
           const selected = template.id === plan.templateId;
           return (
             <Pressable key={template.id} onPress={() => selectTemplate(template.id)}>
@@ -217,10 +216,10 @@ export default function PlanDetailScreen() {
                 ]}>
                 <View style={styles.flexShrink}>
                   <ThemedText style={[styles.cadenceName, { textAlign }]}>
-                    {templateName(template.id, language)}
+                    {templateNameOf(template, language)}
                   </ThemedText>
                   <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
-                    {t('templates.perDay', { n: dailyTargetFor(template.id) })}
+                    {t('templates.perDay', { n: template.dailyTarget })}
                   </ThemedText>
                 </View>
                 <ThemedText style={{ color: theme.primary, fontSize: 18 }}>

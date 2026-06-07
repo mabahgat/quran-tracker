@@ -1,4 +1,4 @@
-import { AppEvent, CadenceTemplate, Plan, ProgressEntry, ProgressStatus, TemplateId } from '../../domain/types';
+import { AppEvent, CadenceTemplate, ExplicitScheduleDay, Plan, ProgressEntry, ProgressStatus, TemplateId, UserSchedule } from '../../domain/types';
 import { EventDraft } from '../../domain/events';
 
 export interface NewPlan {
@@ -55,9 +55,23 @@ export interface EventRepository {
   add(input: NewAppEvent): Promise<AppEvent>;
 }
 
+export interface NewUserSchedule {
+  name: string;
+  source: string;
+  days: ExplicitScheduleDay[];
+}
+
+export interface UserScheduleRepository {
+  list(): Promise<UserSchedule[]>;
+  get(id: string): Promise<UserSchedule | null>;
+  create(input: NewUserSchedule): Promise<UserSchedule>;
+  remove(id: string): Promise<void>;
+}
+
 export interface Repositories {
   plans: PlanRepository;
   progress: ProgressRepository;
   settings: SettingsRepository;
   events: EventRepository;
+  userSchedules: UserScheduleRepository;
 }

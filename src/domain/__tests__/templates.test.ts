@@ -71,7 +71,6 @@ describe('cadence templates (loaded from JSON resources)', () => {
   });
 
   it('throws for unknown templates', () => {
-    // @ts-expect-error invalid id
     expect(() => getTemplate('5-years')).toThrow();
   });
 });

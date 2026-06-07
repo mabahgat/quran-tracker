@@ -128,6 +128,26 @@
     "onePage": "1 page",
     "expertNote": "Expert timetable covering the whole Quran, with a review day every 10 days."
   },
+  "schedules": {
+    "heading": "Schedules",
+    "title": "Schedules",
+    "intro": "Export any plan's schedule to a CSV file (one row per day), edit it, and import it back as your own saved schedule.",
+    "import": "Import schedule from CSV",
+    "export": "Export",
+    "userBadge": "Custom",
+    "exportError": "Could not export this schedule.",
+    "importErrorTitle": "Import failed",
+    "importError": "Could not read that file. Please pick a valid CSV.",
+    "importEmpty": "No schedule rows were found in the file.",
+    "imported": "Imported {{count}} days",
+    "importedWithSkips": "{{count}} row(s) were skipped because they were invalid.",
+    "deleted": "Schedule deleted",
+    "deleteBody": "This will remove the saved schedule. This cannot be undone.",
+    "deleteInUse": "{{count}} plan(s) use this schedule. They will keep their own copy, but it will no longer appear here.",
+    "nameTitle": "Name this schedule",
+    "dayCount": "{{count}} days",
+    "namePlaceholder": "e.g. My custom plan"
+  },
   "settings": {
     "title": "Settings",
     "languageHeading": "Language",

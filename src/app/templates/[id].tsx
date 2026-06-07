@@ -9,13 +9,13 @@ import { ExplicitScheduleView } from '@/components/ExplicitScheduleView';
 import { InfoRow } from '@/components/InfoRow';
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-import { getExplicitSchedule } from '@/domain/explicitSchedule';
+import { buildExplicitSchedule, getExplicitSchedule } from '@/domain/explicitSchedule';
 import { generateSchedule, generateScheduleFrom, ScheduleDay } from '@/domain/schedule';
-import { TEMPLATES } from '@/domain/templates';
 import { TemplateId } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
-import { templateName, formatPosition } from '@/utils/format';
+import { useApp } from '@/state/AppProvider';
+import { formatPosition } from '@/utils/format';
 import { todayISO } from '@/utils/date';
 
 interface Section {
@@ -27,17 +27,23 @@ export default function TemplateScheduleScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { textAlign, flexRow, language, isRTL } = useDirection();
+  const { templates, userSchedules, templateLabel } = useApp();
   const params = useLocalSearchParams<{ id: string; start?: string; target?: string; duration?: string }>();
 
-  const templateId = (TEMPLATES.find((tpl) => tpl.id === params.id)?.id ?? null) as TemplateId | null;
+  const templateId = (templates.find((tpl) => tpl.id === params.id)?.id ?? null) as TemplateId | null;
   const startDate = params.start ?? todayISO();
   const target = params.target ? parseInt(params.target, 10) : NaN;
   const duration = params.duration ? parseInt(params.duration, 10) : NaN;
 
-  const explicit = useMemo(
-    () => (templateId ? getExplicitSchedule(templateId) : null),
-    [templateId],
-  );
+  const explicit = useMemo(() => {
+    if (!templateId) return null;
+    const builtIn = getExplicitSchedule(templateId);
+    if (builtIn) return builtIn;
+    const userSchedule = userSchedules.find((u) => u.id === templateId);
+    return userSchedule
+      ? buildExplicitSchedule(userSchedule.id, userSchedule.source, userSchedule.days)
+      : null;
+  }, [templateId, userSchedules]);
 
   const schedule = useMemo(() => {
     if (!templateId || explicit) return null;
@@ -87,7 +93,7 @@ export default function TemplateScheduleScreen() {
   const header = (
     <Card style={styles.summary}>
       <View style={[styles.summaryTop, { flexDirection: flexRow }]}>
-        <Badge tone="primary" label={templateName(templateId, language)} />
+        <Badge tone="primary" label={templateLabel(templateId)} />
         <ThemedText type="small" style={{ color: theme.textSecondary }}>
           {t('schedule.perDay', { n: schedule.dailyTarget })}
         </ThemedText>

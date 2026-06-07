@@ -1,18 +1,20 @@
 import type * as SQLite from 'expo-sqlite';
 
 import { getTemplate } from '../../domain/templates';
-import { AppEvent, CadenceTemplate, EventDetails, EventType, Plan, ProgressEntry } from '../../domain/types';
+import { AppEvent, CadenceTemplate, EventDetails, EventType, ExplicitScheduleDay, Plan, ProgressEntry, UserSchedule } from '../../domain/types';
 import { newId } from '../../utils/id';
 import {
   EventRepository,
   NewAppEvent,
   NewPlan,
   NewProgressEntry,
+  NewUserSchedule,
   PlanChanges,
   PlanRepository,
   ProgressRepository,
   Repositories,
   SettingsRepository,
+  UserScheduleRepository,
 } from './types';
 
 interface PlanRow {
@@ -44,6 +46,30 @@ interface EventRow {
   plan_name: string;
   details: string | null;
   created_at: string;
+}
+
+interface UserScheduleRow {
+  id: string;
+  name: string;
+  source: string;
+  days: string;
+  created_at: string;
+}
+
+function toUserSchedule(row: UserScheduleRow): UserSchedule {
+  let days: ExplicitScheduleDay[] = [];
+  try {
+    days = JSON.parse(row.days) as ExplicitScheduleDay[];
+  } catch {
+    days = [];
+  }
+  return {
+    id: row.id,
+    name: row.name,
+    source: row.source,
+    days,
+    createdAt: row.created_at,
+  };
 }
 
 function toEvent(row: EventRow): AppEvent {
@@ -301,5 +327,43 @@ export function createSqliteRepositories(db: SQLite.SQLiteDatabase): Repositorie
     },
   };
 
-  return { plans, progress, settings, events };
+  const userSchedules: UserScheduleRepository = {
+    async list() {
+      const rows = await db.getAllAsync<UserScheduleRow>(
+        'SELECT * FROM user_schedules ORDER BY created_at DESC, id DESC',
+      );
+      return rows.map(toUserSchedule);
+    },
+    async get(id) {
+      const row = await db.getFirstAsync<UserScheduleRow>(
+        'SELECT * FROM user_schedules WHERE id = ?',
+        id,
+      );
+      return row ? toUserSchedule(row) : null;
+    },
+    async create(input: NewUserSchedule) {
+      const schedule: UserSchedule = {
+        id: newId(),
+        name: input.name,
+        source: input.source,
+        days: input.days,
+        createdAt: now(),
+      };
+      await db.runAsync(
+        `INSERT INTO user_schedules (id, name, source, days, created_at)
+         VALUES (?, ?, ?, ?, ?)`,
+        schedule.id,
+        schedule.name,
+        schedule.source,
+        JSON.stringify(schedule.days),
+        schedule.createdAt,
+      );
+      return schedule;
+    },
+    async remove(id) {
+      await db.runAsync('DELETE FROM user_schedules WHERE id = ?', id);
+    },
+  };
+
+  return { plans, progress, settings, events, userSchedules };
 }

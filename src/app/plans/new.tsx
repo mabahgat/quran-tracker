@@ -9,12 +9,11 @@ import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
-import { dailyTargetFor, TEMPLATES } from '@/domain/templates';
 import { TemplateId } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
-import { templateName } from '@/utils/format';
+import { templateNameOf } from '@/utils/format';
 import { todayISO } from '@/utils/date';
 
 export default function NewPlanScreen() {
@@ -22,7 +21,7 @@ export default function NewPlanScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { textAlign, flexRow, language } = useDirection();
-  const { createPlan } = useApp();
+  const { createPlan, templates } = useApp();
 
   const [name, setName] = useState('');
   const [templateId, setTemplateId] = useState<TemplateId>('100-days');
@@ -60,7 +59,7 @@ export default function NewPlanScreen() {
 
       <View style={styles.section}>
         <ThemedText style={[styles.label, { textAlign }]}>{t('newPlan.cadenceLabel')}</ThemedText>
-        {TEMPLATES.map((template) => {
+        {templates.map((template) => {
           const selected = template.id === templateId;
           return (
             <Card
@@ -74,10 +73,10 @@ export default function NewPlanScreen() {
                 <View style={[styles.templateRow, { flexDirection: flexRow }]}>
                   <View style={styles.flexShrink}>
                     <ThemedText style={[styles.templateName, { textAlign }]}>
-                      {templateName(template.id, language)}
+                      {templateNameOf(template, language)}
                     </ThemedText>
                     <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
-                      {t('templates.perDay', { n: dailyTargetFor(template.id) })}
+                      {t('templates.perDay', { n: template.dailyTarget })}
                     </ThemedText>
                     {template.kind === 'scheduled' ? (
                       <View style={[styles.badgeRow, { flexDirection: flexRow }]}>

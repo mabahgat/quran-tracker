@@ -155,4 +155,21 @@ describe('memory repositories', () => {
     expect(await repos.events.listByPlan('p1', 1)).toHaveLength(1);
     expect(await repos.events.listByPlan('missing')).toHaveLength(0);
   });
+
+  it('creates, lists and removes user schedules', async () => {
+    const repos = makeRepos();
+    const days = [
+      { day: 1, phase: 1, isReview: false, from: { surah: 1, ayah: 1 }, to: { surah: 1, ayah: 7 } },
+    ];
+    const created = await repos.userSchedules.create({ name: 'Mine', source: 'mine.csv', days });
+    expect(created.id).toBe('id-1');
+    expect(created.days).toHaveLength(1);
+
+    expect(await repos.userSchedules.list()).toHaveLength(1);
+    expect((await repos.userSchedules.get(created.id))?.name).toBe('Mine');
+
+    await repos.userSchedules.remove(created.id);
+    expect(await repos.userSchedules.list()).toHaveLength(0);
+    expect(await repos.userSchedules.get(created.id)).toBeNull();
+  });
 });

@@ -67,7 +67,7 @@ describe('explicit schedules (from Excel resources)', () => {
       let expectedPage = 1;
       for (const day of memorize) {
         expect(day.from.page).toBe(expectedPage);
-        expectedPage = day.to.page + 1;
+        expectedPage = (day.to.page ?? 0) + 1;
       }
       expect(expectedPage - 1).toBe(604);
     });

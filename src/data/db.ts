@@ -66,6 +66,21 @@ const MIGRATIONS: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at DESC);
     `);
   },
+  // User-defined schedules imported from CSV. The day-by-day timetable is stored
+  // as JSON; plans snapshot their own copy, so deleting one here never affects a
+  // plan that was built from it.
+  async (db) => {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS user_schedules (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        source TEXT NOT NULL,
+        days TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_user_schedules_created_at ON user_schedules(created_at DESC);
+    `);
+  },
 ];
 
 export async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
