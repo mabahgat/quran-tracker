@@ -14,7 +14,8 @@
     },
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.imabtech.memory-app"
+      "bundleIdentifier": "com.imabtech.memory-app",
+      "appleTeamId": "C79LL2J8B6"
     },
     "android": {
       "package": "com.imabtech.memory-app",
