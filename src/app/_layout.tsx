@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingScreen, MessageScreen } from '@/components/LoadingScreen';
 import { ToastProvider } from '@/components/Toast';
+import { WatchSync } from '@/components/WatchSync';
 import { RepositoryProvider } from '@/data/RepositoryProvider';
 import { useTheme } from '@/hooks/use-theme';
 import { AppProvider } from '@/state/AppProvider';
@@ -46,6 +47,7 @@ export default function RootLayout() {
             <AppProvider fallback={<LoadingScreen />}>
               <ToastProvider>
                 <RootNavigator />
+                <WatchSync />
                 <StatusBar style="auto" />
               </ToastProvider>
             </AppProvider>

@@ -1,0 +1,18 @@
+/**
+ * Declares the Apple Watch companion as a native target that @bacons/apple-targets
+ * injects into the Xcode project during `expo prebuild`. The watch app talks to
+ * the phone over WatchConnectivity (no App Group — those don't cross devices).
+ */
+/** @type {(config: import('expo/config').ExpoConfig) => import('@bacons/apple-targets').Config} */
+module.exports = (config) => ({
+  type: 'watch',
+  name: 'QuranTrackerWatch',
+  // Appended to the main app bundle id -> com.imabtech.memory-app.watchkitapp
+  bundleIdentifier: '.watchkitapp',
+  deploymentTarget: '10.0',
+  frameworks: ['WatchConnectivity'],
+  colors: {
+    brand: { light: '#1F7A53', dark: '#46C08A' },
+    brandBackground: { light: '#0E3D2A', dark: '#0E3D2A' },
+  },
+});
