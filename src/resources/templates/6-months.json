@@ -1,0 +1,11 @@
+{
+  "id": "6-months",
+  "kind": "computed",
+  "names": {
+    "en": "6 months",
+    "ar": "6 أشهر"
+  },
+  "durationDays": 182,
+  "dailyTarget": 35,
+  "totalVerses": 6236
+}

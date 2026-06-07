@@ -1,0 +1,11 @@
+{
+  "id": "2-years",
+  "kind": "computed",
+  "names": {
+    "en": "2 years",
+    "ar": "سنتان"
+  },
+  "durationDays": 730,
+  "dailyTarget": 9,
+  "totalVerses": 6236
+}

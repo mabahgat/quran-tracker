@@ -1,0 +1,11 @@
+{
+  "id": "incremental-6-months",
+  "kind": "scheduled",
+  "names": {
+    "en": "Incremental 6 months",
+    "ar": "6 أشهر تدريجي"
+  },
+  "durationDays": 182,
+  "dailyTarget": 35,
+  "totalVerses": 6236
+}

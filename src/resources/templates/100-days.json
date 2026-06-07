@@ -1,0 +1,11 @@
+{
+  "id": "100-days",
+  "kind": "computed",
+  "names": {
+    "en": "100 days",
+    "ar": "100 يوم"
+  },
+  "durationDays": 100,
+  "dailyTarget": 63,
+  "totalVerses": 6236
+}

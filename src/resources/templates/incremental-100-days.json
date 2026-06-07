@@ -1,0 +1,11 @@
+{
+  "id": "incremental-100-days",
+  "kind": "scheduled",
+  "names": {
+    "en": "Incremental 100 days",
+    "ar": "100 يوم تدريجي"
+  },
+  "durationDays": 100,
+  "dailyTarget": 63,
+  "totalVerses": 6236
+}

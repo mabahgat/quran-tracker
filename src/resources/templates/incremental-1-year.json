@@ -1,0 +1,11 @@
+{
+  "id": "incremental-1-year",
+  "kind": "scheduled",
+  "names": {
+    "en": "Incremental 1 year",
+    "ar": "سنة تدريجي"
+  },
+  "durationDays": 365,
+  "dailyTarget": 18,
+  "totalVerses": 6236
+}

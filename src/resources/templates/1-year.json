@@ -1,0 +1,11 @@
+{
+  "id": "1-year",
+  "kind": "computed",
+  "names": {
+    "en": "1 year",
+    "ar": "سنة"
+  },
+  "durationDays": 365,
+  "dailyTarget": 18,
+  "totalVerses": 6236
+}

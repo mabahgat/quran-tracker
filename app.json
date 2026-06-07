@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "memory-app",
+    "name": "Quran Memorization",
     "slug": "memory-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,8 @@
     "scheme": "memoryapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.anonymous.memory-app"
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +35,9 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
