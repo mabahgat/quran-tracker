@@ -47,7 +47,8 @@
         }
       ],
       "expo-sqlite",
-      "expo-localization"
+      "expo-localization",
+      "./plugins/withDisableScriptSandboxing"
     ],
     "experiments": {
       "typedRoutes": true,
