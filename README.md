@@ -149,6 +149,19 @@ All persistence goes through small repository interfaces (`PlanRepository`, `Pro
 `SettingsRepository`). The native app uses a SQLite implementation; a future remote backend only needs
 a new implementation of those interfaces wired into `initRepositories()` — no UI changes required.
 
+## App icon
+
+The app icon (an open mushaf with a gold crescent on the app's green gradient) is defined as a single
+SVG mark in `scripts/generate-icons.mjs`, which renders every required PNG variant — main icon,
+favicon, Android adaptive layers (foreground/background/monochrome), and the splash mark. Regenerate
+them after editing the mark with:
+
+```bash
+npm run icons
+```
+
+The SVG sources of truth are written to `assets/icon-source/`.
+
 ## Testing
 
 Pure domain logic and the storage contract are covered by Jest:

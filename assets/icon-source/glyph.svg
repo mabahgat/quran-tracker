@@ -1,0 +1,52 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A8C5F"/>
+      <stop offset="1" stop-color="#0E4A30"/>
+    </linearGradient>
+    <linearGradient id="page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBF7EC"/>
+      <stop offset="1" stop-color="#E8DCC2"/>
+    </linearGradient>
+    <mask id="cres">
+      <circle cx="512" cy="300" r="118" fill="white"/>
+      <circle cx="556" cy="284" r="104" fill="black"/>
+    </mask>
+  </defs>
+  <g transform="translate(512 512) scale(0.92) translate(-512 -484.5)">
+    
+  <!-- crescent -->
+  <g >
+    <circle cx="512" cy="300" r="118" fill="#E8C06A" mask="url(#cres)"/>
+  </g>
+
+  <!-- open book -->
+  <g stroke="#E8DCC2" stroke-width="6" stroke-linejoin="round">
+    <path d="M512 588 C430 552 326 548 232 576 L196 690 C318 660 430 664 512 702 Z" fill="url(#page)"/>
+    <path d="M512 588 C594 552 698 548 792 576 L828 690 C706 660 594 664 512 702 Z" fill="url(#page)"/>
+  </g>
+
+  <!-- spine -->
+  <path d="M512 588 L512 702" stroke="#C9B488" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+  <!-- verse lines -->
+  <g stroke="#5BA985" stroke-width="11" stroke-linecap="round" fill="none" opacity="1">
+    <path d="M300 590 C360 582 430 584 478 598"/>
+    <path d="M286 620 C352 612 430 614 478 628"/>
+    <path d="M280 650 C350 644 432 646 478 660"/>
+    <path d="M546 598 C594 584 664 582 724 590"/>
+    <path d="M546 628 C594 614 672 612 738 620"/>
+    <path d="M546 660 C592 646 674 644 744 650"/>
+  </g>
+
+  <!-- cadence dots: progress beneath the book -->
+  <g>
+    <circle cx="432" cy="772" r="15" fill="#E8C06A"/>
+    <circle cx="472" cy="772" r="15" fill="#E8C06A"/>
+    <circle cx="512" cy="772" r="15" fill="#9FD3B8" opacity="1"/>
+    <circle cx="552" cy="772" r="15" fill="#9FD3B8" opacity="1"/>
+    <circle cx="592" cy="772" r="15" fill="#9FD3B8" opacity="1"/>
+  </g>
+  </g>
+</svg>
