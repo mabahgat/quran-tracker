@@ -3,11 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useRepositories } from '@/data/RepositoryProvider';
 import { progressDeletedEvent, progressLoggedEvent } from '@/domain/events';
-import {
-  buildExplicitSchedule,
-  getExplicitSchedule,
-  nextScheduledChunk,
-} from '@/domain/explicitSchedule';
+import { nextScheduledChunk, resolvePlanSchedule } from '@/domain/explicitSchedule';
 import { computeProjection, ProjectionResult } from '@/domain/projection';
 import { totalMemorized, versesForStatus } from '@/domain/progress';
 import { Plan, ProgressEntry, ProgressStatus, QuranPosition } from '@/domain/types';
@@ -66,17 +62,9 @@ export function usePlan(planId: string | null | undefined): UsePlanResult {
 
   const today = todayISO();
 
-  // Prefer the schedule embedded in the plan's snapshot (user-defined schedules
-  // and any future scheduled plans), so the plan keeps working even if the source
-  // schedule is later deleted; fall back to the built-in resource schedule.
-  const schedule = useMemo(() => {
-    if (!plan) return null;
-    const embedded = plan.templateSnapshot?.schedule;
-    if (embedded && embedded.length > 0) {
-      return buildExplicitSchedule(plan.templateId, plan.templateSnapshot?.source ?? 'schedule', embedded);
-    }
-    return getExplicitSchedule(plan.templateId);
-  }, [plan]);
+  // The explicit timetable backing this plan (embedded snapshot or built-in
+  // resource), or null for computed plans. See resolvePlanSchedule.
+  const schedule = useMemo(() => (plan ? resolvePlanSchedule(plan) : null), [plan]);
 
   // Verses memorized before today, so today's goal/credit is independent of how
   // today is currently logged (lets the user freely switch Full/Partial/Missed).

@@ -1,4 +1,9 @@
-import { getExplicitSchedule, nextScheduledChunk } from '../explicitSchedule';
+import {
+  buildExplicitSchedule,
+  getExplicitSchedule,
+  nextScheduledChunk,
+  scheduleDaysElapsed,
+} from '../explicitSchedule';
 import { cumulativeIndexOf, isValidPosition, TOTAL_AYAH } from '../quran';
 import { TemplateId } from '../types';
 
@@ -114,5 +119,38 @@ describe('nextScheduledChunk', () => {
 
   it('returns null once the whole Quran is memorized', () => {
     expect(nextScheduledChunk(schedule, TOTAL_AYAH)).toBeNull();
+  });
+});
+
+describe('scheduleDaysElapsed', () => {
+  // Synthetic schedule: two memorization days, a review day, then one more
+  // memorization day. Cumulative verses by day-end: 7, 17, 17 (review), 27.
+  const schedule = buildExplicitSchedule('incremental-100-days', 'test', [
+    { day: 1, phase: 1, isReview: false, from: { surah: 1, ayah: 1 }, to: { surah: 1, ayah: 7 } },
+    { day: 2, phase: 1, isReview: false, from: { surah: 2, ayah: 1 }, to: { surah: 2, ayah: 10 } },
+    { day: 3, phase: 1, isReview: true, from: { surah: 1, ayah: 1 }, to: { surah: 2, ayah: 10 } },
+    { day: 4, phase: 1, isReview: false, from: { surah: 2, ayah: 11 }, to: { surah: 2, ayah: 20 } },
+  ]);
+
+  it('is zero before anything is memorized', () => {
+    expect(scheduleDaysElapsed(schedule, 0)).toBe(0);
+  });
+
+  it('counts a fully completed memorization day', () => {
+    expect(scheduleDaysElapsed(schedule, 7)).toBe(1);
+  });
+
+  it('interpolates a partially completed day', () => {
+    // Halfway through day 2's 10 verses (7 -> 17).
+    expect(scheduleDaysElapsed(schedule, 12)).toBeCloseTo(1.5);
+  });
+
+  it('credits an interspersed review day once its memorization is complete', () => {
+    // Reaching verse 17 completes day 2 and the day-3 review that follows.
+    expect(scheduleDaysElapsed(schedule, 17)).toBe(3);
+  });
+
+  it('returns the full day count when everything is memorized', () => {
+    expect(scheduleDaysElapsed(schedule, 27)).toBe(4);
   });
 });

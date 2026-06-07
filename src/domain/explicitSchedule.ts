@@ -5,6 +5,7 @@ import { cumulativeIndexOf, isValidPosition } from './quran';
 import {
   ExplicitSchedule,
   ExplicitScheduleDay,
+  Plan,
   QuranPosition,
   SchedulePoint,
   TemplateId,
@@ -131,4 +132,47 @@ export function nextScheduledChunk(
     }
   }
   return null;
+}
+
+/**
+ * Resolves the explicit timetable that drives a plan: the schedule embedded in
+ * the plan's snapshot (user-defined schedules and any future scheduled plans) so
+ * the plan keeps working even if the source is later deleted, otherwise the
+ * built-in resource schedule. Returns null for computed (flat-target) plans.
+ */
+export function resolvePlanSchedule(plan: Plan): ExplicitSchedule | null {
+  const embedded = plan.templateSnapshot?.schedule;
+  if (embedded && embedded.length > 0) {
+    return buildExplicitSchedule(plan.templateId, plan.templateSnapshot?.source ?? 'schedule', embedded);
+  }
+  return getExplicitSchedule(plan.templateId);
+}
+
+/**
+ * How far into an explicit schedule a given memorized-verse count reaches,
+ * expressed as a (possibly fractional) number of schedule days in [0, totalDays].
+ *
+ * This is what makes projections schedule-aware: an incremental plan front-loads
+ * small daily portions, so measuring progress as "schedule days completed" (not
+ * raw verses) means that keeping up with the plan reads as on-track rather than
+ * hundreds of days behind. Review days advance the calendar but not the verse
+ * count, so they are credited once the memorization up to them is complete.
+ */
+export function scheduleDaysElapsed(schedule: ExplicitSchedule, versesMemorized: number): number {
+  const done = Math.max(0, versesMemorized);
+  let prevCumulative = 0;
+  let completedDays = 0;
+  for (let i = 0; i < schedule.days.length; i += 1) {
+    const day = schedule.days[i];
+    const dayCumulative = day.isReview ? prevCumulative : cumulativeIndexOf(day.to);
+    if (done >= dayCumulative) {
+      completedDays = i + 1;
+      prevCumulative = dayCumulative;
+    } else {
+      const span = dayCumulative - prevCumulative;
+      const fraction = span > 0 ? (done - prevCumulative) / span : 0;
+      return completedDays + fraction;
+    }
+  }
+  return completedDays;
 }

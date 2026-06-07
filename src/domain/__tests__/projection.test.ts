@@ -1,5 +1,5 @@
 import { computeProjection } from '../projection';
-import { TOTAL_AYAH } from '../quran';
+import { cumulativeIndexOf, TOTAL_AYAH } from '../quran';
 import { dailyTargetFor, getTemplate } from '../templates';
 import { Plan, ProgressEntry, ProgressStatus, TemplateId } from '../types';
 import { addDays } from '../../utils/date';
@@ -85,6 +85,31 @@ describe('computeProjection', () => {
 
     expect(result.elapsedDays).toBe(10);
     expect(result.ratePerDay).toBeCloseTo(0.5);
+    expect(result.daysAheadOfTarget).not.toBeNull();
+    expect(result.daysAheadOfTarget!).toBeLessThan(0);
+  });
+
+  it('is on track for a scheduled plan when keeping the schedule pace', () => {
+    // Regression: the incremental schedule front-loads tiny daily portions, so a
+    // verse-rate projection used to read a user who is keeping up as hundreds of
+    // days behind. Day 1 of "Incremental 100 days" memorizes Al-Fatihah through
+    // Al-Baqarah 2:5 (12 verses).
+    const plan = makePlan({ templateId: 'incremental-100-days' });
+    const day1Verses = cumulativeIndexOf({ surah: 2, ayah: 5 });
+    const result = computeProjection(plan, [entry('2025-01-01', day1Verses, 'full')], '2025-01-01');
+
+    expect(result.totalMemorized).toBe(day1Verses);
+    expect(result.projectedFinishDate).toBe(result.targetFinishDate);
+    expect(result.daysAheadOfTarget).toBe(0);
+  });
+
+  it('projects a scheduled plan behind when slower than the schedule pace', () => {
+    // One schedule day's content done over five calendar days = 0.2 days/day.
+    const plan = makePlan({ templateId: 'incremental-100-days' });
+    const day1Verses = cumulativeIndexOf({ surah: 2, ayah: 5 });
+    const result = computeProjection(plan, [entry('2025-01-05', day1Verses, 'full')], '2025-01-05');
+
+    expect(result.elapsedDays).toBe(5);
     expect(result.daysAheadOfTarget).not.toBeNull();
     expect(result.daysAheadOfTarget!).toBeLessThan(0);
   });

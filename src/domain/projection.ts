@@ -1,3 +1,4 @@
+import { resolvePlanSchedule, scheduleDaysElapsed } from './explicitSchedule';
 import { lastLogDate, totalMemorized } from './progress';
 import { lastMemorizedPosition, nextPosition, TOTAL_AYAH } from './quran';
 import { getTemplate } from './templates';
@@ -22,9 +23,12 @@ export interface ProjectionResult {
 /**
  * Computes the current standing and a finish-date projection for a plan.
  *
- * Rate is based on actual logged effort: total verses memorized divided by the
- * number of elapsed days from the plan start through the most recent log. The
- * projected finish extends that rate from `today` over the remaining verses.
+ * For computed (flat-target) plans the projected finish extends the user's
+ * average verse rate over the remaining verses. For scheduled plans the rate is
+ * measured in *schedule days completed per calendar day* instead: an incremental
+ * plan front-loads small daily portions, so a verse-based rate would wrongly
+ * read a user who is keeping up as hundreds of days behind. Measuring how far
+ * through the schedule they are keeps "keeping up" on-track.
  */
 export function computeProjection(
   plan: Plan,
@@ -46,9 +50,19 @@ export function computeProjection(
   const elapsedDays = latestLog ? Math.max(1, daysInclusive(plan.startDate, latestLog)) : 0;
   const ratePerDay = memorized > 0 && elapsedDays > 0 ? memorized / elapsedDays : null;
 
+  const schedule = resolvePlanSchedule(plan);
+
   let projectedFinishDate: string | null = null;
   if (isComplete) {
     projectedFinishDate = latestLog ?? today;
+  } else if (schedule) {
+    // Schedule-aware: extrapolate the user's pace *through the schedule*.
+    const elapsedScheduleDays = scheduleDaysElapsed(schedule, memorized);
+    const schedulePace = elapsedScheduleDays > 0 && elapsedDays > 0 ? elapsedScheduleDays / elapsedDays : null;
+    if (schedulePace && schedulePace > 0) {
+      const remainingScheduleDays = Math.max(0, schedule.days.length - elapsedScheduleDays);
+      projectedFinishDate = addDays(today, Math.ceil(remainingScheduleDays / schedulePace));
+    }
   } else if (ratePerDay && ratePerDay > 0) {
     projectedFinishDate = addDays(today, Math.ceil(remaining / ratePerDay));
   }
