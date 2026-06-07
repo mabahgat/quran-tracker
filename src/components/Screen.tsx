@@ -20,6 +20,7 @@ export function Screen({ children, scroll = true, contentStyle }: ScreenProps) {
         <ScrollView
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
           showsVerticalScrollIndicator={false}>
           {inner}
         </ScrollView>

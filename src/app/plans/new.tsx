@@ -20,7 +20,7 @@ export default function NewPlanScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const theme = useTheme();
-  const { textAlign, flexRow, language, isRTL } = useDirection();
+  const { textAlign, flexRow, language } = useDirection();
   const { createPlan, templates } = useApp();
 
   const [name, setName] = useState('');
@@ -122,14 +122,13 @@ export default function NewPlanScreen() {
             </ThemedText>
           </Pressable>
         </View>
-        <View style={[styles.dateRow, { flexDirection: flexRow }]}>
+        <View style={styles.dateRow}>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={t('newPlan.previousDay')}
             onPress={() => shiftStart(-1)}
             style={[styles.stepper, { borderColor: theme.border }]}>
-            <ThemedText style={[styles.stepperText, { color: theme.primary }]}>
-              {isRTL ? '+' : '−'}
-            </ThemedText>
+            <ThemedText style={[styles.stepperText, { color: theme.primary }]}>−</ThemedText>
           </Pressable>
           <TextInput
             value={startDate}
@@ -147,11 +146,10 @@ export default function NewPlanScreen() {
           />
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={t('newPlan.nextDay')}
             onPress={() => shiftStart(1)}
             style={[styles.stepper, { borderColor: theme.border }]}>
-            <ThemedText style={[styles.stepperText, { color: theme.primary }]}>
-              {isRTL ? '−' : '+'}
-            </ThemedText>
+            <ThemedText style={[styles.stepperText, { color: theme.primary }]}>+</ThemedText>
           </Pressable>
         </View>
         {!startDateValid ? (
@@ -203,6 +201,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   dateRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
   },

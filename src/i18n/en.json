@@ -87,6 +87,8 @@
     "cadenceLabel": "Choose a cadence",
     "startDateLabel": "Start date",
     "today": "Today",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
     "startDateInvalid": "Enter a valid date (YYYY-MM-DD).",
     "create": "Create plan",
     "nameRequired": "Please enter a plan name",

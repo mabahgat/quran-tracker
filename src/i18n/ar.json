@@ -87,6 +87,8 @@
     "cadenceLabel": "اختر الوتيرة",
     "startDateLabel": "تاريخ البدء",
     "today": "اليوم",
+    "previousDay": "اليوم السابق",
+    "nextDay": "اليوم التالي",
     "startDateInvalid": "أدخل تاريخاً صحيحاً (سنة-شهر-يوم).",
     "create": "إنشاء الخطة",
     "nameRequired": "الرجاء إدخال اسم الخطة",
