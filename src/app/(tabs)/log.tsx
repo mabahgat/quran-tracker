@@ -13,7 +13,7 @@ export default function LogScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { textAlign } = useDirection();
-  const { events } = useEvents();
+  const { events, removeEvent } = useEvents();
 
   if (events.length === 0) {
     return (
@@ -27,7 +27,7 @@ export default function LogScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <EventList events={events} />
+      <EventList events={events} onDelete={(event) => removeEvent(event.id)} />
     </View>
   );
 }

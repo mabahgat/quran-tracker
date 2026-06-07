@@ -156,6 +156,21 @@ describe('memory repositories', () => {
     expect(await repos.events.listByPlan('missing')).toHaveLength(0);
   });
 
+  it('removes a single event and clears the whole log', async () => {
+    const repos = makeRepos();
+    const a = await repos.events.add({ type: 'plan_created', planId: 'p1', planName: 'A', details: {} });
+    await repos.events.add({ type: 'plan_set_default', planId: 'p1', planName: 'A', details: {} });
+    expect(await repos.events.list()).toHaveLength(2);
+
+    await repos.events.remove(a.id);
+    const afterRemove = await repos.events.list();
+    expect(afterRemove).toHaveLength(1);
+    expect(afterRemove.some((e) => e.id === a.id)).toBe(false);
+
+    await repos.events.clear();
+    expect(await repos.events.list()).toHaveLength(0);
+  });
+
   it('creates, lists and removes user schedules', async () => {
     const repos = makeRepos();
     const days = [

@@ -30,5 +30,18 @@ export function useEvents(options: UseEventsOptions = {}) {
     }, [reload]),
   );
 
-  return { events, loading, reload };
+  const removeEvent = useCallback(
+    async (id: string) => {
+      await repositories.events.remove(id);
+      await reload();
+    },
+    [repositories, reload],
+  );
+
+  const clearAll = useCallback(async () => {
+    await repositories.events.clear();
+    await reload();
+  }, [repositories, reload]);
+
+  return { events, loading, reload, removeEvent, clearAll };
 }

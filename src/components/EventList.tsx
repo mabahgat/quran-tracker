@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SectionList, StyleSheet, View } from 'react-native';
+import { Pressable, SectionList, StyleSheet, View } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
@@ -35,6 +36,8 @@ interface EventListProps {
   events: AppEvent[];
   /** Hide the per-row plan name (used when the list is already scoped to a plan). */
   showPlanName?: boolean;
+  /** When provided, each row can be swiped to reveal a delete action. */
+  onDelete?: (event: AppEvent) => void;
   ListHeaderComponent?: React.ComponentProps<typeof SectionList>['ListHeaderComponent'];
 }
 
@@ -71,9 +74,10 @@ export function useEventTitle() {
   };
 }
 
-export function EventList({ events, showPlanName = true, ListHeaderComponent }: EventListProps) {
+export function EventList({ events, showPlanName = true, onDelete, ListHeaderComponent }: EventListProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
-  const { textAlign, flexRow } = useDirection();
+  const { textAlign, flexRow, isRTL } = useDirection();
   const titleFor = useEventTitle();
 
   const sections = useMemo<Section[]>(() => {
@@ -107,8 +111,12 @@ export function EventList({ events, showPlanName = true, ListHeaderComponent }: 
       )}
       renderItem={({ item }) => {
         const { time } = localDateTimeParts(item.createdAt);
-        return (
-          <View style={[styles.row, { flexDirection: flexRow, borderColor: theme.border }]}>
+        const row = (
+          <View
+            style={[
+              styles.row,
+              { flexDirection: flexRow, borderColor: theme.border, backgroundColor: theme.background },
+            ]}>
             <ThemedText style={styles.icon}>{eventIcon(item)}</ThemedText>
             <View style={styles.body}>
               <ThemedText style={[styles.title, { textAlign }]}>{titleFor(item)}</ThemedText>
@@ -122,6 +130,34 @@ export function EventList({ events, showPlanName = true, ListHeaderComponent }: 
               {time}
             </ThemedText>
           </View>
+        );
+
+        if (!onDelete) {
+          return row;
+        }
+
+        const deleteAction = () => (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onDelete(item)}
+            style={[styles.swipeDelete, { backgroundColor: theme.danger }]}>
+            <ThemedText style={[styles.swipeDeleteText, { color: theme.onPrimary }]}>
+              {t('common.delete')}
+            </ThemedText>
+          </Pressable>
+        );
+
+        // The user swipes the row to the right to reveal a delete action on the
+        // leading edge (mirrored for RTL).
+        return (
+          <Swipeable
+            friction={2}
+            overshootLeft={false}
+            overshootRight={false}
+            renderLeftActions={isRTL ? undefined : deleteAction}
+            renderRightActions={isRTL ? deleteAction : undefined}>
+            {row}
+          </Swipeable>
         );
       }}
     />
@@ -157,5 +193,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  swipeDelete: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 96,
+    borderRadius: Radius.small,
+  },
+  swipeDeleteText: {
+    fontWeight: '700',
   },
 });

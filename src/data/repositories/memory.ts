@@ -163,6 +163,12 @@ export function createMemoryRepositories(idGen: () => string = fallbackId): Repo
       events.set(event.id, event);
       return event;
     },
+    async remove(id) {
+      events.delete(id);
+    },
+    async clear() {
+      events.clear();
+    },
   };
 
   const userSchedulesRepo: UserScheduleRepository = {

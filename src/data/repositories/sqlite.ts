@@ -325,6 +325,12 @@ export function createSqliteRepositories(db: SQLite.SQLiteDatabase): Repositorie
       );
       return event;
     },
+    async remove(id) {
+      await db.runAsync('DELETE FROM events WHERE id = ?', id);
+    },
+    async clear() {
+      await db.runAsync('DELETE FROM events');
+    },
   };
 
   const userSchedules: UserScheduleRepository = {

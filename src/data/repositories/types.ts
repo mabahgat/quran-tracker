@@ -53,6 +53,10 @@ export interface EventRepository {
   /** Events for a single plan, most recent first. Optionally capped to `limit`. */
   listByPlan(planId: string, limit?: number): Promise<AppEvent[]>;
   add(input: NewAppEvent): Promise<AppEvent>;
+  /** Removes a single event from the activity log. */
+  remove(id: string): Promise<void>;
+  /** Clears the entire activity log. */
+  clear(): Promise<void>;
 }
 
 export interface NewUserSchedule {

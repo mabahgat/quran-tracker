@@ -15,7 +15,7 @@ export default function PlanLogScreen() {
   const theme = useTheme();
   const { textAlign } = useDirection();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { events } = useEvents({ planId: id });
+  const { events, removeEvent } = useEvents({ planId: id });
 
   if (events.length === 0) {
     return (
@@ -31,7 +31,7 @@ export default function PlanLogScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <EventList events={events} showPlanName={false} />
+      <EventList events={events} showPlanName={false} onDelete={(event) => removeEvent(event.id)} />
     </View>
   );
 }

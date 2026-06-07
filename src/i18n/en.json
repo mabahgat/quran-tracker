@@ -165,6 +165,11 @@
     "planTitle": "Plan log",
     "empty": "No activity yet. Create a plan and start logging your daily progress to build your history here.",
     "emptyPlan": "No activity for this plan yet. Log your daily progress to start tracking it here.",
+    "clear": "Clear log",
+    "clearHint": "Swipe an entry to delete it, or clear the whole log ({{count}} entries).",
+    "clearTitle": "Clear activity log",
+    "clearBody": "This will permanently delete all activity log entries. This cannot be undone.",
+    "cleared": "Activity log cleared",
     "deletedPlan": "{{name}} (deleted)",
     "event": {
       "plan_created": "Created plan",

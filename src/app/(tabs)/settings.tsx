@@ -16,6 +16,7 @@ import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { LANGUAGES, Language } from '@/i18n';
 import { useApp } from '@/state/AppProvider';
+import { useEvents } from '@/state/useEvents';
 import { templateNameOf } from '@/utils/format';
 import { csvFileName, pickCsv, shareCsv } from '@/utils/scheduleShare';
 
@@ -34,6 +35,7 @@ export default function SettingsScreen() {
     importSchedule,
     deleteUserSchedule,
   } = useApp();
+  const { events: logEvents, clearAll: clearLog } = useEvents();
 
   const [busy, setBusy] = useState(false);
   const [pendingDays, setPendingDays] = useState<ExplicitScheduleDay[] | null>(null);
@@ -114,6 +116,20 @@ export default function SettingsScreen() {
         onPress: async () => {
           await deleteUserSchedule(template.id);
           showToast(t('schedules.deleted'));
+        },
+      },
+    ]);
+  };
+
+  const confirmClearLog = () => {
+    Alert.alert(t('log.clearTitle'), t('log.clearBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('log.clear'),
+        style: 'destructive',
+        onPress: async () => {
+          await clearLog();
+          showToast(t('log.cleared'));
         },
       },
     ]);
@@ -226,6 +242,22 @@ export default function SettingsScreen() {
             </View>
           </Card>
         ))}
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText style={[styles.heading, { textAlign }]}>{t('log.title')}</ThemedText>
+        {logEvents.length === 0 ? (
+          <Card>
+            <ThemedText style={{ textAlign, color: theme.textSecondary }}>{t('log.empty')}</ThemedText>
+          </Card>
+        ) : (
+          <>
+            <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
+              {t('log.clearHint', { count: logEvents.length })}
+            </ThemedText>
+            <Button variant="secondary" title={t('log.clear')} onPress={confirmClearLog} />
+          </>
+        )}
       </View>
 
       <Card>
