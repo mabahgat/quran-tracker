@@ -14,25 +14,34 @@ import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { templateNameOf } from '@/utils/format';
-import { todayISO } from '@/utils/date';
+import { addDays, isValidISODate, todayISO } from '@/utils/date';
 
 export default function NewPlanScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const theme = useTheme();
-  const { textAlign, flexRow, language } = useDirection();
+  const { textAlign, flexRow, language, isRTL } = useDirection();
   const { createPlan, templates } = useApp();
 
   const [name, setName] = useState('');
   const [templateId, setTemplateId] = useState<TemplateId>('100-days');
+  const [startDate, setStartDate] = useState(todayISO());
   const [error, setError] = useState(false);
 
+  const startDateValid = isValidISODate(startDate);
+
+  const shiftStart = (delta: number) => {
+    if (startDateValid) {
+      setStartDate(addDays(startDate, delta));
+    }
+  };
+
   const submit = async () => {
-    if (name.trim().length === 0) {
+    if (name.trim().length === 0 || !startDateValid) {
       setError(true);
       return;
     }
-    await createPlan({ name, templateId });
+    await createPlan({ name, templateId, startDate });
     router.back();
   };
 
@@ -95,7 +104,7 @@ export default function NewPlanScreen() {
                 onPress={() =>
                   router.push({
                     pathname: '/templates/[id]',
-                    params: { id: template.id, start: todayISO() },
+                    params: { id: template.id, start: startDateValid ? startDate : todayISO() },
                   })
                 }
               />
@@ -105,12 +114,51 @@ export default function NewPlanScreen() {
       </View>
 
       <Card>
-        <View style={[styles.templateRow, { flexDirection: flexRow }]}>
-          <ThemedText style={{ color: theme.textSecondary, textAlign }}>
-            {t('newPlan.startDateLabel')}
-          </ThemedText>
-          <ThemedText style={{ fontWeight: '600' }}>{todayISO()}</ThemedText>
+        <View style={[styles.dateHeader, { flexDirection: flexRow }]}>
+          <ThemedText style={[styles.label, { textAlign }]}>{t('newPlan.startDateLabel')}</ThemedText>
+          <Pressable onPress={() => setStartDate(todayISO())}>
+            <ThemedText type="small" style={{ color: theme.primary }}>
+              {t('newPlan.today')}
+            </ThemedText>
+          </Pressable>
         </View>
+        <View style={[styles.dateRow, { flexDirection: flexRow }]}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => shiftStart(-1)}
+            style={[styles.stepper, { borderColor: theme.border }]}>
+            <ThemedText style={[styles.stepperText, { color: theme.primary }]}>
+              {isRTL ? '+' : '−'}
+            </ThemedText>
+          </Pressable>
+          <TextInput
+            value={startDate}
+            onChangeText={(value) => {
+              setStartDate(value.replace(/[^0-9-]/g, ''));
+              if (error) setError(false);
+            }}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={theme.textSecondary}
+            keyboardType="numbers-and-punctuation"
+            autoCapitalize="none"
+            autoCorrect={false}
+            maxLength={10}
+            style={[styles.dateInput, { color: theme.text, borderColor: theme.border }]}
+          />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => shiftStart(1)}
+            style={[styles.stepper, { borderColor: theme.border }]}>
+            <ThemedText style={[styles.stepperText, { color: theme.primary }]}>
+              {isRTL ? '−' : '+'}
+            </ThemedText>
+          </Pressable>
+        </View>
+        {!startDateValid ? (
+          <ThemedText type="small" style={{ textAlign, color: theme.danger }}>
+            {t('newPlan.startDateInvalid')}
+          </ThemedText>
+        ) : null}
       </Card>
 
       <Button title={t('newPlan.create')} onPress={submit} />
@@ -148,5 +196,36 @@ const styles = StyleSheet.create({
   },
   flexShrink: {
     flexShrink: 1,
+  },
+  dateHeader: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  dateRow: {
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  stepper: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.medium,
+  },
+  stepperText: {
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  dateInput: {
+    flex: 1,
+    minHeight: 48,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.medium,
+    paddingHorizontal: Spacing.three,
+    fontSize: 17,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

@@ -29,6 +29,16 @@ export function daysInclusive(fromIso: string, toIso: string): number {
   return diffDays(fromIso, toIso) + 1;
 }
 
+/** True when `iso` is a real calendar date in strict YYYY-MM-DD form. Rejects
+ *  malformed strings and rolled-over dates (e.g. 2025-02-30). */
+export function isValidISODate(iso: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    return false;
+  }
+  const date = parseISODate(iso);
+  return !Number.isNaN(date.getTime()) && toISODate(date) === iso;
+}
+
 /** Local-time parts of an ISO timestamp, for displaying the activity log. */
 export function localDateTimeParts(iso: string): { date: string; time: string } {
   const d = new Date(iso);

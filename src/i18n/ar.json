@@ -86,6 +86,8 @@
     "namePlaceholder": "مثال: رحلتي مع القرآن",
     "cadenceLabel": "اختر الوتيرة",
     "startDateLabel": "تاريخ البدء",
+    "today": "اليوم",
+    "startDateInvalid": "أدخل تاريخاً صحيحاً (سنة-شهر-يوم).",
     "create": "إنشاء الخطة",
     "nameRequired": "الرجاء إدخال اسم الخطة",
     "viewSchedule": "عرض الجدول"

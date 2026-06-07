@@ -86,6 +86,8 @@
     "namePlaceholder": "e.g. My Quran Journey",
     "cadenceLabel": "Choose a cadence",
     "startDateLabel": "Start date",
+    "today": "Today",
+    "startDateInvalid": "Enter a valid date (YYYY-MM-DD).",
     "create": "Create plan",
     "nameRequired": "Please enter a plan name",
     "viewSchedule": "View schedule"

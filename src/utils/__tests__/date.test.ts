@@ -1,4 +1,4 @@
-import { addDays, daysInclusive, diffDays, parseISODate, todayISO, toISODate } from '../date';
+import { addDays, daysInclusive, diffDays, isValidISODate, parseISODate, todayISO, toISODate } from '../date';
 
 describe('date utilities', () => {
   it('adds days across month and year boundaries', () => {
@@ -27,5 +27,19 @@ describe('date utilities', () => {
 
   it('parses and formats round-trip', () => {
     expect(toISODate(parseISODate('2025-06-06'))).toBe('2025-06-06');
+  });
+
+  it('validates strict ISO dates', () => {
+    expect(isValidISODate('2025-06-06')).toBe(true);
+    expect(isValidISODate('2024-02-29')).toBe(true);
+    // Malformed or non-strict forms.
+    expect(isValidISODate('2025-6-6')).toBe(false);
+    expect(isValidISODate('2025/06/06')).toBe(false);
+    expect(isValidISODate('not-a-date')).toBe(false);
+    expect(isValidISODate('')).toBe(false);
+    // Rolled-over / impossible calendar dates.
+    expect(isValidISODate('2025-02-30')).toBe(false);
+    expect(isValidISODate('2025-13-01')).toBe(false);
+    expect(isValidISODate('2023-02-29')).toBe(false);
   });
 });
