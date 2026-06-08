@@ -41,3 +41,7 @@ example
 # generated native folders
 /ios
 /android
+
+# AI agent guidance (kept local, not in the repo)
+CLAUDE.md
+AGENTS.md
