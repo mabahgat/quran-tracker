@@ -16,6 +16,7 @@ struct WatchStrings {
     let noPlanTitle: String
     let noPlanBody: String
     let loggedToday: String
+    let defaultTag: String
 
     static func of(_ language: String) -> WatchStrings {
         if language == "ar" {
@@ -30,8 +31,9 @@ struct WatchStrings {
                 cancel: "إلغاء",
                 verses: "آية",
                 noPlanTitle: "لا توجد خطة",
-                noPlanBody: "افتح التطبيق على الـ iPhone وحدّد خطة افتراضية.",
-                loggedToday: "تم تسجيل اليوم"
+                noPlanBody: "افتح التطبيق على الـ iPhone وأنشئ خطة.",
+                loggedToday: "تم تسجيل اليوم",
+                defaultTag: "افتراضية"
             )
         }
         return WatchStrings(
@@ -45,8 +47,9 @@ struct WatchStrings {
             cancel: "Cancel",
             verses: "verses",
             noPlanTitle: "No plan",
-            noPlanBody: "Open the app on your iPhone and set a default plan.",
-            loggedToday: "Logged today"
+            noPlanBody: "Open the app on your iPhone and create a plan.",
+            loggedToday: "Logged today",
+            defaultTag: "Default"
         )
     }
 }

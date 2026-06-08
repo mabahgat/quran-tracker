@@ -2,23 +2,33 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var manager: ConnectivityManager
-    @State private var showPartial = false
-    @State private var justLogged = false
+    @State private var selection = 0
+    @State private var didInit = false
 
-    private var snapshot: WatchSnapshot { manager.snapshot }
-    private var strings: WatchStrings { WatchStrings.of(snapshot.language) }
+    private var payload: WatchPayload { manager.payload }
+    private var strings: WatchStrings { WatchStrings.of(payload.language) }
 
     var body: some View {
         Group {
-            if snapshot.hasPlan {
-                glance
+            if payload.hasPlan && !payload.plans.isEmpty {
+                TabView(selection: $selection) {
+                    ForEach(Array(payload.plans.enumerated()), id: \.element.id) { index, plan in
+                        PlanGlance(plan: plan, strings: strings, manager: manager)
+                            .tag(index)
+                    }
+                }
+                .tabViewStyle(.page)
             } else {
                 noPlan
             }
         }
-        .environment(\.layoutDirection, snapshot.language == "ar" ? .rightToLeft : .leftToRight)
-        .sheet(isPresented: $showPartial) {
-            PartialView(manager: manager, strings: strings, maxVerses: max(snapshot.dailyGoal, 1))
+        .environment(\.layoutDirection, payload.language == "ar" ? .rightToLeft : .leftToRight)
+        .onAppear {
+            // Open on the default plan the first time the payload arrives.
+            if !didInit && !payload.plans.isEmpty {
+                selection = min(max(payload.defaultIndex, 0), payload.plans.count - 1)
+                didInit = true
+            }
         }
     }
 
@@ -32,36 +42,53 @@ struct ContentView: View {
         }
         .padding()
     }
+}
 
-    private var glance: some View {
+/// A single plan's glance plus log actions. One per page in the TabView.
+struct PlanGlance: View {
+    let plan: WatchPlanEntry
+    let strings: WatchStrings
+    @ObservedObject var manager: ConnectivityManager
+    @State private var showPartial = false
+    @State private var justLogged = false
+
+    var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                Text(snapshot.planName).font(.headline).lineLimit(2)
-
-                row(strings.goal, snapshot.goalLabel)
-                if !snapshot.upToLabel.isEmpty {
-                    row("→", snapshot.upToLabel)
+                HStack {
+                    Text(plan.planName).font(.headline).lineLimit(2)
+                    if plan.isDefault {
+                        Spacer()
+                        Text(strings.defaultTag)
+                            .font(.caption2)
+                            .foregroundStyle(Color("brand"))
+                    }
                 }
-                if !snapshot.positionLabel.isEmpty {
-                    row(strings.today, snapshot.positionLabel)
+
+                row(strings.goal, plan.goalLabel)
+                if !plan.upToLabel.isEmpty {
+                    row("→", plan.upToLabel)
+                }
+                if !plan.positionLabel.isEmpty {
+                    row(strings.today, plan.positionLabel)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    ProgressView(value: Double(snapshot.percent), total: 100)
+                    ProgressView(value: Double(plan.percent), total: 100)
                         .tint(Color("brand"))
-                    Text("\(strings.progress) · \(snapshot.percent)%")
+                    Text("\(strings.progress) · \(plan.percent)%")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
 
-                if !snapshot.projectionLabel.isEmpty {
-                    Text(snapshot.projectionLabel)
+                if !plan.projectionLabel.isEmpty {
+                    Text(plan.projectionLabel)
                         .font(.caption2)
                         .foregroundStyle(Color("brand"))
                 }
 
-                if justLogged || !snapshot.statusLabel.isEmpty {
-                    Text(justLogged ? strings.loggedToday : "\(strings.loggedToday): \(snapshot.statusLabel)")
+                if justLogged || !plan.statusLabel.isEmpty {
+                    Text(justLogged ? strings.loggedToday : "\(strings.loggedToday): \(plan.statusLabel)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -69,6 +96,9 @@ struct ContentView: View {
                 actions
             }
             .padding(.horizontal, 4)
+        }
+        .sheet(isPresented: $showPartial) {
+            PartialView(manager: manager, strings: strings, planId: plan.id, maxVerses: max(plan.dailyGoal, 1))
         }
     }
 
@@ -101,7 +131,7 @@ struct ContentView: View {
     }
 
     private func log(_ status: String) {
-        manager.sendLog(status: status, verses: 0)
+        manager.sendLog(planId: plan.id, status: status, verses: 0)
         withAnimation { justLogged = true }
     }
 }
@@ -110,6 +140,7 @@ struct ContentView: View {
 struct PartialView: View {
     @ObservedObject var manager: ConnectivityManager
     let strings: WatchStrings
+    let planId: String
     let maxVerses: Int
     @Environment(\.dismiss) private var dismiss
     @State private var verses = 1
@@ -123,7 +154,7 @@ struct PartialView: View {
             HStack {
                 Button(strings.cancel) { dismiss() }
                 Button(strings.save) {
-                    manager.sendLog(status: "partial", verses: verses)
+                    manager.sendLog(planId: planId, status: "partial", verses: verses)
                     dismiss()
                 }
                 .tint(Color("brand"))
