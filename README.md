@@ -64,6 +64,23 @@ npm run type-check   # TypeScript type-check (tsc --noEmit)
 npm run lint         # Expo ESLint
 ```
 
+### Deploy a release build to a device
+
+To put a standalone **Release** build on a physically connected iPhone (and its
+paired Apple Watch), without needing Metro running:
+
+```bash
+npm run deploy:ios            # build, install on the iPhone + Watch, and launch
+npm run deploy:ios:launch     # just relaunch what is already installed
+npm run deploy:ios -- --clean # clean build first
+```
+
+Requires Xcode and a connected, trusted device. The script auto-discovers the
+iPhone and Watch, builds with `xcodebuild`, and installs/launches with
+`devicectl` (retrying the Watch's flaky tunnel). Run `./scripts/deploy-ios.sh
+--help` for all options. Note: with a free Apple team, the signature expires
+about 7 days after the build — just re-run to refresh.
+
 ## Project structure
 
 ```

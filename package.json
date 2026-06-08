@@ -41,6 +41,8 @@
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "deploy:ios": "./scripts/deploy-ios.sh",
+    "deploy:ios:launch": "./scripts/deploy-ios.sh --launch-only",
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
