@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
@@ -33,8 +33,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { textAlign, flexRow, language, isRTL } = useDirection();
-  const { defaultPlan } = useApp();
-  const { plan, projection, todayEntry, log, dailyGoal, isScheduled, scheduledTarget } =
+  const { defaultPlan, plans, setDefaultPlan } = useApp();
+  const { plan, projection, todayEntry, log, dailyGoal, isScheduled, scheduledTarget, reload } =
     usePlan(defaultPlan?.id);
 
   const [partialMode, setPartialMode] = useState(false);
@@ -44,6 +44,15 @@ export default function HomeScreen() {
   const [posAyah, setPosAyah] = useState('1');
   const [surahPickerVisible, setSurahPickerVisible] = useState(false);
   const [posError, setPosError] = useState<null | 'invalid' | 'behind'>(null);
+  const [switcherVisible, setSwitcherVisible] = useState(false);
+
+  const switchToPlan = async (id: string) => {
+    setSwitcherVisible(false);
+    if (id !== defaultPlan?.id) {
+      await setDefaultPlan(id);
+      await reload();
+    }
+  };
 
   if (!plan || !projection) {
     return (
@@ -189,6 +198,19 @@ export default function HomeScreen() {
             {t('home.viewScheduleLink')} {isRTL ? '‹' : '›'}
           </ThemedText>
         </Pressable>
+        {plans.length > 1 ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setSwitcherVisible(true)}
+            style={({ pressed }) => [
+              styles.switchButton,
+              { flexDirection: flexRow, borderColor: theme.border, opacity: pressed ? 0.6 : 1 },
+            ]}>
+            <ThemedText type="smallBold" style={{ color: theme.primary }}>
+              ⇄ {t('home.switchPlan')}
+            </ThemedText>
+          </Pressable>
+        ) : null}
       </View>
 
       <Card>
@@ -393,6 +415,45 @@ export default function HomeScreen() {
         onSelect={onPickSurah}
         onClose={() => setSurahPickerVisible(false)}
       />
+
+      <Modal
+        visible={switcherVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSwitcherVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setSwitcherVisible(false)}>
+          <Pressable
+            style={[styles.modalCard, { backgroundColor: theme.background, borderColor: theme.border }]}
+            onPress={() => {}}>
+            <ThemedText style={[styles.heading, { textAlign }]}>{t('home.switchPlan')}</ThemedText>
+            {plans.map((item) => {
+              const active = item.id === defaultPlan?.id;
+              return (
+                <Pressable
+                  key={item.id}
+                  onPress={() => switchToPlan(item.id)}
+                  style={[
+                    styles.switchRow,
+                    {
+                      flexDirection: flexRow,
+                      borderColor: active ? theme.primary : theme.border,
+                      backgroundColor: active ? theme.backgroundSelected : 'transparent',
+                    },
+                  ]}>
+                  <View style={styles.flexShrink}>
+                    <ThemedText style={[styles.switchName, { textAlign }]}>{item.name}</ThemedText>
+                    <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
+                      {templateNameOf(item.templateSnapshot, language)}
+                    </ThemedText>
+                  </View>
+                  {active ? <Badge tone="primary" label={t('plans.defaultBadge')} /> : null}
+                </Pressable>
+              );
+            })}
+            <Button variant="ghost" title={t('common.cancel')} onPress={() => setSwitcherVisible(false)} />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </Screen>
   );
 }
@@ -481,5 +542,39 @@ const styles = StyleSheet.create({
   },
   projection: {
     gap: Spacing.one,
+  },
+  switchButton: {
+    alignSelf: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.pill,
+    marginTop: Spacing.one,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: Spacing.four,
+  },
+  modalCard: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.large,
+    padding: Spacing.four,
+    gap: Spacing.two,
+  },
+  switchRow: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.medium,
+  },
+  switchName: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
