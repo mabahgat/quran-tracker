@@ -14,7 +14,7 @@ import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { addDays } from '@/utils/date';
-import { formatPosition } from '@/utils/format';
+import { directionalArrow, formatPosition } from '@/utils/format';
 
 interface Section {
   phase: number;
@@ -46,7 +46,7 @@ export function ExplicitScheduleView({ schedule, templateId, startDate }: Explic
     return result;
   }, [schedule]);
 
-  const arrow = isRTL ? '←' : '→';
+  const arrow = directionalArrow(isRTL);
   const finishDate = addDays(startDate, schedule.totalDays - 1);
 
   const header = (
@@ -61,7 +61,7 @@ export function ExplicitScheduleView({ schedule, templateId, startDate }: Explic
       <InfoRow label={t('schedule.finishDate')} value={finishDate} emphasize />
       <InfoRow label={t('schedule.totalDays')} value={String(schedule.totalDays)} />
       {schedule.totalPages != null ? (
-        <InfoRow label={t('schedule.pages', { n: schedule.totalPages })} value={`1 → ${schedule.totalPages}`} />
+        <InfoRow label={t('schedule.pages', { n: schedule.totalPages })} value={`1 ${arrow} ${schedule.totalPages}`} />
       ) : null}
       <ThemedText type="small" style={{ textAlign, color: theme.textSecondary }}>
         {t('schedule.expertNote')}

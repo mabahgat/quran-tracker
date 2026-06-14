@@ -13,20 +13,20 @@ import { SurahPicker } from '@/components/SurahPicker';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import {
-  cumulativeIndexOf,
-  getSurah,
-  isValidPosition,
-  lastMemorizedPosition,
-  nextPosition,
-  positionAtIndex,
-  TOTAL_AYAH,
+    cumulativeIndexOf,
+    getSurah,
+    isValidPosition,
+    lastMemorizedPosition,
+    nextPosition,
+    positionAtIndex,
+    TOTAL_AYAH,
 } from '@/domain/quran';
 import { QuranPosition } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { usePlan } from '@/state/usePlan';
-import { formatPosition, surahName, templateNameOf } from '@/utils/format';
+import { directionalArrow, directionalChevron, formatPosition, surahName, templateNameOf } from '@/utils/format';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -100,7 +100,8 @@ export default function HomeScreen() {
     nextStart && dailyGoal > 0
       ? positionAtIndex(Math.min(projection.totalMemorized + dailyGoal, TOTAL_AYAH))
       : null;
-  const rangeArrow = isRTL ? '←' : '→';
+  const rangeArrow = directionalArrow(isRTL);
+  const chevron = directionalChevron(isRTL);
 
   const openPartial = () => {
     setPartialValue(todayEntry?.status === 'partial' ? String(todayEntry.verses) : '');
@@ -178,7 +179,7 @@ export default function HomeScreen() {
             {plan.name}
           </ThemedText>
           <ThemedText style={[styles.chevron, { color: theme.textSecondary }]}>
-            {isRTL ? '‹' : '›'}
+            {chevron}
           </ThemedText>
         </Pressable>
         <Pressable
@@ -195,7 +196,7 @@ export default function HomeScreen() {
               : t('templates.perDay', { n: plan.dailyTarget })}
           </ThemedText>
           <ThemedText type="small" style={{ color: theme.primary }}>
-            {t('home.viewScheduleLink')} {isRTL ? '‹' : '›'}
+            {t('home.viewScheduleLink')} {chevron}
           </ThemedText>
         </Pressable>
         {plans.length > 1 ? (

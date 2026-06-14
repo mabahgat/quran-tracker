@@ -15,8 +15,8 @@ import { TemplateId } from '@/domain/types';
 import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
-import { formatPosition } from '@/utils/format';
 import { todayISO } from '@/utils/date';
+import { directionalArrow, formatPosition } from '@/utils/format';
 
 interface Section {
   title: string;
@@ -88,7 +88,7 @@ export default function TemplateScheduleScreen() {
     );
   }
 
-  const arrow = isRTL ? '←' : '→';
+  const arrow = directionalArrow(isRTL);
 
   const header = (
     <Card style={styles.summary}>

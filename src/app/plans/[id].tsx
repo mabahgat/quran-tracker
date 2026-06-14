@@ -18,7 +18,7 @@ import { useDirection } from '@/hooks/use-direction';
 import { useTheme } from '@/hooks/use-theme';
 import { useApp } from '@/state/AppProvider';
 import { usePlan } from '@/state/usePlan';
-import { formatPosition, templateNameOf } from '@/utils/format';
+import { directionalChevron, formatPosition, templateNameOf } from '@/utils/format';
 import { planFileName, shareJson } from '@/utils/scheduleShare';
 
 const STATUS_TONE: Record<ProgressStatus, 'success' | 'warning' | 'danger'> = {
@@ -32,6 +32,7 @@ export default function PlanDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { textAlign, flexRow, language, isRTL } = useDirection();
+  const chevron = directionalChevron(isRTL);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { plan, entries, projection, reload, editEntry, deleteEntry } = usePlan(id);
   const { setDefaultPlan, renamePlan, changePlanTemplate, templates, templateLabel, exportPlanData } =
@@ -272,7 +273,7 @@ export default function PlanDetailScreen() {
                     </ThemedText>
                   ) : null}
                   <Badge tone={STATUS_TONE[entry.status]} label={t(`status.${entry.status}`)} />
-                  <ThemedText style={{ color: theme.textSecondary }}>{isRTL ? '‹' : '›'}</ThemedText>
+                  <ThemedText style={{ color: theme.textSecondary }}>{chevron}</ThemedText>
                 </View>
               </Pressable>
             ))}
